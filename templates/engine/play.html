@@ -1,21 +1,96 @@
-{% extends "engine/base.html" %}
-{% block title %}{{ story.title }} — Play{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ story.title }}</title>
 
-{% block content %}
-<main class="min-h-screen pb-32">
-    <div class="max-w-3xl mx-auto px-6 py-12 lg:py-24">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
+    <!-- Fonts (Serif for elegance, Sans for minimal accents) -->
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Crimson Pro"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        // Richer dark theme (Zinc/Slate) instead of pure black
+                        background: '#18181b', /* zinc-900 */
+                        surface: '#27272a',    /* zinc-800 */
+                        text: '#f4f4f5',       /* zinc-100 */
+                        muted: '#a1a1aa',      /* zinc-400 */
+                        accent: '#e4e4e7',     /* zinc-200 */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #18181b;
+            color: #f4f4f5;
+        }
+
+        /* Cinematic fade-in transition */
+        @keyframes cinematicFadeIn {
+            from { opacity: 0; transform: translateY(15px); filter: blur(3px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        .cinematic-fade-in {
+            animation: cinematicFadeIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Subtle scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+    </style>
+</head>
+<body class="font-serif min-h-screen flex flex-col items-center justify-start selection:bg-surface selection:text-white pb-32">
+
+    <div class="w-full max-w-2xl px-8 py-16 md:py-24 transition-opacity duration-1000">
+        
         <!-- Story Header -->
-        <div class="mb-12 border-4 border-black bg-primary-container shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
-            <h1 class="font-['Epilogue'] font-[800] text-4xl md:text-5xl text-black uppercase leading-tight">{{ story.title }}</h1>
-            <p class="font-metadata text-xs uppercase text-black/60 mt-2">by {{ story.author.username }}</p>
-        </div>
+        <header class="mb-20 text-center opacity-70 cinematic-fade-in border-b border-surface pb-8">
+            <h1 class="text-3xl md:text-5xl font-serif tracking-wide mb-3">{{ story.title }}</h1>
+            <p class="font-sans text-[10px] md:text-xs uppercase tracking-[0.3em] text-muted">by {{ story.author.username }}</p>
+        </header>
 
         <!-- Reading Container (HTMX target) -->
-        <div id="reading-container">
+        <main id="reading-container">
             {% include "engine/partials/play_content.html" %}
-        </div>
+        </main>
 
     </div>
-</main>
-{% endblock %}
+
+    <!-- Auto-scroll logic -->
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            // When a new passage loads, scroll smoothly to the top of the reading container
+            if (event.detail.target.id === 'reading-container') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            // When a riddle is answered, scroll smoothly to show the feedback
+            else if (event.detail.target.id === 'riddle-feedback') {
+                event.detail.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -509,26 +509,45 @@ def riddle_check(request, node_id):
             ).update(current_node=target_node)
 
         if request.headers.get('HX-Request'):
-            return render(request, 'engine/partials/play_content.html', {
+            response = render(request, 'engine/partials/play_content.html', {
                 'story': story,
                 'node': target_node,
                 'choices': choices,
             })
+            response['HX-Retarget'] = '#reading-container'
+            return response
         play_url = reverse('engine:play_story', kwargs={
             'slug': story.slug, 'story_uuid': story.story_uuid,
         })
         return redirect(f'{play_url}?node_id={target_node.pk}')
     else:
-        # No matching branch edge configured — show inline feedback
+        # No matching branch edge configured — show inline feedback and disable form
         if is_correct:
-            msg = '✓ Correct! But no next passage is connected.'
+            msg = '✓ Correct! But the path fades into nothingness (no connected node).'
+            color = 'text-emerald-500'
         else:
-            msg = 'That\'s not quite right. Try again.'
-        color = '#16a34a' if is_correct else '#dc2626'
-        return HttpResponse(
-            f'<p class="font-metadata text-xs uppercase font-bold mt-2 neo-fade-in" '
-            f'style="color: {color};">{msg}</p>'
-        )
+            msg = 'Incorrect. The path is sealed.'
+            color = 'text-red-500'
+
+        play_url = reverse('engine:play_story', kwargs={'slug': story.slug, 'story_uuid': story.story_uuid})
+
+        # Return the feedback message AND an OOB swap to replace the form
+        html = f'''
+        <p class="font-serif italic text-xl {color} mt-4">{msg}</p>
+
+        <div id="riddle-form" hx-swap-oob="true" class="flex flex-col items-center gap-6 w-full">
+            <input type="text" value="{player_answer}" disabled
+                   class="w-full bg-transparent border-b-2 border-surface text-center text-2xl text-muted p-3 font-serif tracking-widest cursor-not-allowed opacity-50" />
+            <div class="mt-8 flex justify-center w-full">
+                <a href="{play_url}"
+                   class="font-sans text-[10px] tracking-[0.3em] uppercase text-muted px-8 py-4 border border-surface hover:border-muted hover:bg-surface/30 transition-all rounded-sm no-underline flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg">restart_alt</span>
+                    Restart Story
+                </a>
+            </div>
+        </div>
+        '''
+        return HttpResponse(html)
 
 
 # ─────────────────────────────────────────────

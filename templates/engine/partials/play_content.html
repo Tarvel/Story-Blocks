@@ -1,81 +1,79 @@
-<!-- Play Content Partial (swapped via HTMX on choice click) -->
-<div class="neo-fade-in">
+<!-- Play Content Partial -->
+<div class="cinematic-fade-in relative">
+    <!-- Subtle left border accent -->
+    <div class="hidden sm:block absolute left-[-2rem] top-2 bottom-2 w-[1px] bg-gradient-to-b from-transparent via-surface to-transparent"></div>
+
     <!-- Narrative Content -->
-    <article class="space-y-6 mb-12">
-        <p class="font-body-lg text-black leading-relaxed whitespace-pre-wrap">{{ node.content }}</p>
+    <article class="space-y-8 mb-24">
+        <p class="text-xl md:text-2xl leading-[1.9] text-text font-serif tracking-wide whitespace-pre-wrap">{{ node.content }}</p>
     </article>
 
     <!-- Node type indicator -->
     {% if node.node_type == 'death' %}
-    <div class="bg-error/10 border-4 border-error p-6 shadow-[4px_4px_0px_0px_rgba(186,26,26,1)] mb-8 flex items-center gap-4">
-        <span class="material-symbols-outlined text-error text-4xl">skull</span>
-        <div>
-            <p class="font-['Epilogue'] font-[800] text-xl uppercase text-error">You Have Perished</p>
-            <p class="font-metadata text-xs text-error/70 uppercase">This path leads to ruin.</p>
-        </div>
+    <div class="text-center mb-16 opacity-70 p-8 border border-red-900/30 bg-red-950/10 rounded-sm">
+        <span class="material-symbols-outlined text-4xl mb-4 block text-red-500/70">skull</span>
+        <p class="text-xl tracking-[0.2em] uppercase font-serif text-red-500/90">You Have Perished</p>
+        <p class="font-sans text-[10px] text-red-500/50 uppercase tracking-[0.3em] mt-3">The path ends here.</p>
     </div>
     {% elif node.node_type == 'ending' %}
-    <div class="bg-tertiary/10 border-4 border-tertiary p-6 shadow-[4px_4px_0px_0px_rgba(0,106,106,1)] mb-8 flex items-center gap-4">
-        <span class="material-symbols-outlined text-tertiary text-4xl">flag</span>
-        <div>
-            <p class="font-['Epilogue'] font-[800] text-xl uppercase text-tertiary">Story Complete</p>
-            <p class="font-metadata text-xs text-tertiary/70 uppercase">You have reached an ending.</p>
-        </div>
+    <div class="text-center mb-16 opacity-70 p-8 border border-emerald-900/30 bg-emerald-950/10 rounded-sm">
+        <span class="material-symbols-outlined text-4xl mb-4 block text-emerald-500/70">flag</span>
+        <p class="text-xl tracking-[0.2em] uppercase font-serif text-emerald-500/90">Story Complete</p>
+        <p class="font-sans text-[10px] text-emerald-500/50 uppercase tracking-[0.3em] mt-3">You have reached the end.</p>
     </div>
     {% endif %}
 
-    <!-- Riddle Input (for riddle nodes) -->
+    <!-- Riddle Input -->
     {% if node.node_type == 'riddle' %}
-    <section class="space-y-4">
-        <div class="bg-[#7B2D8E]/10 border-4 border-[#7B2D8E] p-6 shadow-[4px_4px_0px_0px_rgba(123,45,142,1)] mb-4 flex items-center gap-4">
-            <span class="material-symbols-outlined text-[#7B2D8E] text-4xl">quiz</span>
-            <div>
-                <p class="font-['Epilogue'] font-[800] text-xl uppercase text-[#7B2D8E]">Riddle</p>
-                <p class="font-metadata text-xs text-[#7B2D8E]/70 uppercase">Type your answer below to continue.</p>
-            </div>
+    <section class="max-w-md mx-auto text-center mt-12 mb-24">
+        <div class="opacity-60 mb-8">
+            <span class="material-symbols-outlined text-3xl mb-2 block">quiz</span>
+            <p class="font-sans text-[10px] tracking-[0.2em] uppercase text-muted">A riddle blocks your path</p>
         </div>
-        <form hx-post="{% url 'engine:riddle_check' node_id=node.pk %}"
+        <form id="riddle-form"
+              hx-post="{% url 'engine:riddle_check' node_id=node.pk %}"
               hx-target="#riddle-feedback"
               hx-swap="innerHTML">
             {% csrf_token %}
-            <div class="flex gap-3">
+            <div class="flex flex-col items-center gap-6">
                 <input type="text" name="answer" required autocomplete="off"
-                       class="flex-1 bg-white border-4 border-black p-4 font-body-lg uppercase focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                       placeholder="YOUR ANSWER..." />
+                       class="w-full bg-transparent border-b-2 border-surface text-center text-2xl text-text p-3 focus:outline-none focus:border-muted transition-colors placeholder:text-surface font-serif tracking-widest"
+                       placeholder="Speak your answer..." />
                 <button type="submit"
-                        class="bg-[#FFEE00] text-black border-4 border-black px-6 py-4 font-['Epilogue'] font-[800] uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+                        class="font-sans text-xs uppercase tracking-[0.3em] text-muted hover:text-white border border-surface px-8 py-3 rounded-sm hover:bg-surface/50 transition-all choice-btn">
                     Submit
                 </button>
             </div>
         </form>
-        <div id="riddle-feedback"></div>
+        <div id="riddle-feedback" class="mt-8"></div>
     </section>
 
     {% elif choices %}
     <!-- Choice Stack -->
-    <section class="space-y-4">
-        <p class="font-metadata uppercase font-bold tracking-widest text-zinc-500 mb-4 border-b-2 border-zinc-200 pb-2">Your Decision:</p>
+    <section class="mt-20 flex flex-col items-center gap-4">
         {% for choice in choices %}
-        <button class="w-full group relative flex items-center bg-white border-4 border-black p-6 text-left hover:bg-secondary hover:text-white transition-colors shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-2 active:translate-y-2 active:shadow-none"
+        <button class="w-full max-w-lg text-center p-5 border border-surface bg-transparent hover:bg-surface/40 hover:border-muted transition-all duration-300 rounded-sm group choice-btn"
                 hx-get="{% url 'engine:make_choice' choice_id=choice.pk %}"
                 hx-target="#reading-container"
                 hx-swap="innerHTML"
                 hx-push-url="false">
-            <span class="material-symbols-outlined mr-4 text-3xl group-hover:scale-125 transition-transform">chevron_right</span>
-            <p class="font-['Epilogue'] font-[800] text-lg uppercase leading-tight">{{ choice.choice_text }}</p>
+            <p class="font-serif text-lg md:text-xl tracking-wide text-muted group-hover:text-text transition-colors duration-300">{{ choice.choice_text }}</p>
         </button>
         {% endfor %}
     </section>
+    
     {% elif node.node_type == 'death' or node.node_type == 'ending' %}
     <!-- Restart button for terminal nodes -->
-    <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}"
-       class="block w-full bg-[#FFEE00] text-black border-4 border-black p-6 text-center font-['Epilogue'] font-[800] text-xl uppercase shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all no-underline">
-        <span class="material-symbols-outlined text-3xl mr-2 align-middle">restart_alt</span>
-        Restart Story
-    </a>
+    <div class="flex justify-center mt-20">
+        <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}"
+           class="font-sans text-[10px] tracking-[0.3em] uppercase text-muted px-8 py-4 border border-surface hover:border-muted hover:bg-surface/30 transition-all rounded-sm no-underline flex items-center gap-3 choice-btn">
+            <span class="material-symbols-outlined text-lg">restart_alt</span>
+            Restart Story
+        </a>
+    </div>
     {% else %}
-    <div class="bg-zinc-100 border-4 border-dashed border-zinc-300 p-6 text-center">
-        <p class="font-metadata uppercase text-zinc-500">No choices available — this passage needs edges.</p>
+    <div class="text-center mt-20 opacity-30 p-8 border border-dashed border-surface">
+        <p class="font-sans text-[10px] tracking-[0.3em] uppercase text-muted">The path fades into nothingness.</p>
     </div>
     {% endif %}
 </div>
