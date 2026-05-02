@@ -20,6 +20,7 @@
     }
     .node-type-start .node-header { background: #FFEE00; color: black; }
     .node-type-passage .node-header { background: #0035c6; color: white; }
+    .node-type-riddle .node-header { background: #7B2D8E; color: white; }
     .node-type-death .node-header { background: #ba1a1a; color: white; }
     .node-type-ending .node-header { background: #006a6a; color: white; }
     .node-type-checkpoint .node-header { background: #333123; color: white; }
@@ -295,6 +296,7 @@
         const typeIcons = {
             'start': 'play_circle',
             'passage': 'article',
+            'riddle': 'quiz',
             'death': 'skull',
             'ending': 'flag',
             'checkpoint': 'bookmark',
@@ -560,7 +562,7 @@
             const existingEl = nodesContainer.querySelector(`[data-node-id="${nodeId}"]`);
             if (existingEl && nodeData) {
                 const typeIcons = {
-                    'start': 'play_circle', 'passage': 'article',
+                    'start': 'play_circle', 'passage': 'article', 'riddle': 'quiz',
                     'death': 'skull', 'ending': 'flag', 'checkpoint': 'bookmark',
                 };
                 // Update header

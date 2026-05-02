@@ -30,7 +30,7 @@ class NodeForm(forms.ModelForm):
     """Form for creating and editing nodes."""
     class Meta:
         model = Node
-        fields = ['title', 'content', 'node_type']
+        fields = ['title', 'content', 'node_type', 'correct_answer']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'w-full bg-white border-4 border-black p-3 font-metadata uppercase focus:outline-none focus:bg-primary-container transition-colors',
@@ -44,6 +44,10 @@ class NodeForm(forms.ModelForm):
             }),
             'node_type': forms.Select(attrs={
                 'class': 'w-full bg-white border-4 border-black p-3 font-metadata uppercase focus:outline-none focus:bg-primary-container transition-colors',
+            }),
+            'correct_answer': forms.TextInput(attrs={
+                'class': 'w-full bg-white border-4 border-black p-3 font-metadata focus:outline-none focus:bg-primary-container transition-colors',
+                'placeholder': 'e.g. Tai (case-insensitive)',
             }),
         }
 

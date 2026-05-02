@@ -40,6 +40,33 @@
                 {{ form.content }}
             </div>
 
+            <!-- Riddle Answer (only visible when node_type is 'riddle') -->
+            <div id="riddle-answer-field" class="mb-4 {% if node.node_type != 'riddle' %}hidden{% endif %}">
+                <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">
+                    <span class="material-symbols-outlined text-sm align-middle mr-1">quiz</span>
+                    Correct Answer
+                </label>
+                {{ form.correct_answer }}
+                <p class="font-metadata text-[10px] text-zinc-400 mt-1">Player must type this to proceed (case-insensitive).</p>
+            </div>
+
+            <script>
+                // Toggle riddle answer field visibility when node type changes
+                (function() {
+                    const typeSelect = document.getElementById('id_node_type');
+                    const riddleField = document.getElementById('riddle-answer-field');
+                    if (typeSelect && riddleField) {
+                        typeSelect.addEventListener('change', function() {
+                            if (this.value === 'riddle') {
+                                riddleField.classList.remove('hidden');
+                            } else {
+                                riddleField.classList.add('hidden');
+                            }
+                        });
+                    }
+                })();
+            </script>
+
             <button type="submit" class="w-full bg-primary-container border-2 border-black py-3 font-['Epilogue'] font-[800] uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
                 Commit Changes
             </button>
@@ -133,7 +160,7 @@
                 htmx.ajax('POST', url, {
                     target: '#ai-result',
                     swap: 'innerHTML',
-                    values: { text: ta.value },
+                    values: { text: ta.value, node_id: '{{ node.pk }}' },
                 }).then(() => {
                     // Hide spinner, re-enable buttons
                     spinner.classList.add('hidden');

@@ -48,6 +48,7 @@ class Node(models.Model):
     NODE_TYPES = [
         ('start', 'Start'),
         ('passage', 'Passage'),
+        ('riddle', 'Riddle'),
         ('death', 'Death'),
         ('ending', 'Ending'),
         ('checkpoint', 'Checkpoint'),
@@ -68,6 +69,13 @@ class Node(models.Model):
     # Canvas coordinates for the visual editor
     x = models.FloatField(default=100.0)
     y = models.FloatField(default=100.0)
+    # Riddle answer (only used when node_type='riddle')
+    correct_answer = models.CharField(
+        max_length=500,
+        blank=True,
+        default='',
+        help_text='The answer the player must type (case-insensitive). Only used for riddle nodes.',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -36,6 +36,7 @@ urlpatterns = [
     # ── Player Engine ──
     path('play/<int:story_id>/', views.play_story, name='play_story'),
     path('play/choice/<int:choice_id>/', views.make_choice, name='make_choice'),
+    path('play/riddle/<int:node_id>/check/', views.riddle_check, name='riddle_check'),
 
     # ── Community ──
     path('community/', views.community_templates_view, name='community'),

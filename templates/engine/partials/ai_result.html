@@ -7,20 +7,27 @@
             {% elif action == 'expand' %}Scene Expansion
             {% endif %}
         </span>
-        <button onclick="
-            const ta = document.getElementById('node-content-editor');
-            if (ta) {
-                {% if action == 'expand' %}
-                ta.value += '\n\n' + this.closest('[data-ai-text]').dataset.aiText;
-                {% else %}
-                ta.value = this.closest('[data-ai-text]').dataset.aiText;
-                {% endif %}
-            }
-            this.textContent = '✓ Applied';
-            this.disabled = true;
-        " class="bg-primary-container border-2 border-black px-2 py-1 font-metadata text-[10px] uppercase hover:translate-x-[1px] hover:translate-y-[1px] transition-all">
-            Apply
-        </button>
+        <div class="flex gap-2">
+            <button onclick="
+                const ta = document.getElementById('node-content-editor');
+                if (ta) {
+                    {% if action == 'expand' %}
+                    ta.value += '\n\n' + this.closest('[data-ai-text]').dataset.aiText;
+                    {% else %}
+                    ta.value = this.closest('[data-ai-text]').dataset.aiText;
+                    {% endif %}
+                }
+                this.textContent = '✓ Applied';
+                this.disabled = true;
+            " class="bg-primary-container border-2 border-black px-2 py-1 font-metadata text-[10px] uppercase hover:translate-x-[1px] hover:translate-y-[1px] transition-all">
+                Apply
+            </button>
+            <button onclick="document.getElementById('ai-result').innerHTML = '';"
+                    class="bg-white border-2 border-black px-2 py-1 font-metadata text-[10px] uppercase hover:bg-error hover:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                    title="Dismiss">
+                ✕
+            </button>
+        </div>
     </div>
     <div data-ai-text="{{ result|escapejs }}">
         <p class="font-body-md text-on-surface-variant text-sm whitespace-pre-wrap">{{ result }}</p>

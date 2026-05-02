@@ -24,8 +24,35 @@
     </div>
     {% endif %}
 
+    <!-- Riddle Input (for riddle nodes) -->
+    {% if node.node_type == 'riddle' %}
+    <section class="space-y-4">
+        <div class="bg-[#7B2D8E]/10 border-4 border-[#7B2D8E] p-6 shadow-[4px_4px_0px_0px_rgba(123,45,142,1)] mb-4 flex items-center gap-4">
+            <span class="material-symbols-outlined text-[#7B2D8E] text-4xl">quiz</span>
+            <div>
+                <p class="font-['Epilogue'] font-[800] text-xl uppercase text-[#7B2D8E]">Riddle</p>
+                <p class="font-metadata text-xs text-[#7B2D8E]/70 uppercase">Type your answer below to continue.</p>
+            </div>
+        </div>
+        <form hx-post="{% url 'engine:riddle_check' node_id=node.pk %}"
+              hx-target="#riddle-feedback"
+              hx-swap="innerHTML">
+            {% csrf_token %}
+            <div class="flex gap-3">
+                <input type="text" name="answer" required autocomplete="off"
+                       class="flex-1 bg-white border-4 border-black p-4 font-body-lg uppercase focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                       placeholder="YOUR ANSWER..." />
+                <button type="submit"
+                        class="bg-[#FFEE00] text-black border-4 border-black px-6 py-4 font-['Epilogue'] font-[800] uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+                    Submit
+                </button>
+            </div>
+        </form>
+        <div id="riddle-feedback"></div>
+    </section>
+
+    {% elif choices %}
     <!-- Choice Stack -->
-    {% if choices %}
     <section class="space-y-4">
         <p class="font-metadata uppercase font-bold tracking-widest text-zinc-500 mb-4 border-b-2 border-zinc-200 pb-2">Your Decision:</p>
         {% for choice in choices %}

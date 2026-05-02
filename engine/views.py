@@ -260,7 +260,6 @@ def choice_delete(request, choice_id):
         Choice, pk=choice_id, source_node__story__author=request.user
     )
     choice.delete()
-    import json
     response = HttpResponse('')
     response['HX-Trigger'] = json.dumps({'edgeDeleted': choice_id})
     return response
@@ -270,6 +269,41 @@ def choice_delete(request, choice_id):
 # Phase 4: AI Co-Pilot Endpoints
 # ─────────────────────────────────────────────
 
+def _gather_ai_context(request):
+    """
+    Helper: gather the passage text + optional story context.
+    If node_id is provided, we also send the story title and
+    content of connected (parent) nodes for richer AI context.
+    """
+    text = request.POST.get('text', '')
+    node_id = request.POST.get('node_id', '')
+    context_parts = []
+
+    if node_id:
+        try:
+            node = Node.objects.select_related('story').get(pk=int(node_id))
+            context_parts.append(f"Story: \"{node.story.title}\"")
+            if node.story.description:
+                context_parts.append(f"Story Description: {node.story.description}")
+            context_parts.append(f"Current Node: \"{node.title}\"")
+
+            # Gather content from parent/sibling nodes for narrative flow
+            incoming = node.incoming_choices.select_related('source_node').all()[:3]
+            for choice in incoming:
+                src = choice.source_node
+                if src.content:
+                    context_parts.append(
+                        f"Previous passage (\"{src.title}\"): {src.content[:300]}"
+                    )
+        except (Node.DoesNotExist, ValueError):
+            pass
+
+    if context_parts:
+        context_header = "=== STORY CONTEXT ===\n" + "\n".join(context_parts) + "\n\n=== CURRENT PASSAGE ===\n"
+        return context_header + text, text
+    return text, text
+
+
 @login_required
 @require_POST
 def ai_enhance(request):
@@ -278,7 +312,8 @@ def ai_enhance(request):
     if not text.strip():
         return HttpResponse('<p class="text-error font-metadata">No text provided.</p>')
 
-    result = generate_story_enhancement(text, 'enhance')
+    full_prompt, _ = _gather_ai_context(request)
+    result = generate_story_enhancement(full_prompt, 'enhance')
     return render(request, 'engine/partials/ai_result.html', {
         'result': result,
         'action': 'enhance',
@@ -293,7 +328,8 @@ def ai_choices(request):
     if not text.strip():
         return HttpResponse('<p class="text-error font-metadata">No text provided.</p>')
 
-    result = generate_story_enhancement(text, 'choices')
+    full_prompt, _ = _gather_ai_context(request)
+    result = generate_story_enhancement(full_prompt, 'choices')
     return render(request, 'engine/partials/ai_result.html', {
         'result': result,
         'action': 'choices',
@@ -308,10 +344,10 @@ def ai_expand(request):
     if not text.strip():
         return HttpResponse('<p class="text-error font-metadata">No text provided.</p>')
 
-    result = generate_story_enhancement(text, 'expand')
+    full_prompt, _ = _gather_ai_context(request)
+    result = generate_story_enhancement(full_prompt, 'expand')
     return render(request, 'engine/partials/ai_result.html', {
         'result': result,
-        'action': 'expand',
     })
 
 
@@ -392,6 +428,51 @@ def make_choice(request, choice_id):
         })
 
     return redirect(f'/play/{story.pk}/?node_id={target_node.pk}')
+
+
+@require_POST
+def riddle_check(request, node_id):
+    """
+    Validate a player's answer on a riddle node.
+    Case-insensitive match against Node.correct_answer.
+    On success, proceed to the first outgoing choice's target.
+    """
+    node = get_object_or_404(Node, pk=node_id, node_type='riddle')
+    player_answer = request.POST.get('answer', '').strip()
+    story = node.story
+
+    if player_answer.lower() == node.correct_answer.lower():
+        # Correct — go to the first outgoing choice target
+        first_choice = node.outgoing_choices.first()
+        if first_choice:
+            target_node = first_choice.target_node
+            choices = target_node.get_outgoing_choices()
+
+            # Update game state
+            if request.user.is_authenticated:
+                GameState.objects.filter(
+                    user=request.user, story=story
+                ).update(current_node=target_node)
+
+            if request.headers.get('HX-Request'):
+                return render(request, 'engine/partials/play_content.html', {
+                    'story': story,
+                    'node': target_node,
+                    'choices': choices,
+                })
+            return redirect(f'/play/{story.pk}/?node_id={target_node.pk}')
+        else:
+            # No outgoing choice configured
+            return HttpResponse(
+                '<p class="font-metadata text-xs uppercase text-error font-bold mt-2">'
+                '⚠ Correct! But no next passage is connected.</p>'
+            )
+    else:
+        # Wrong answer
+        return HttpResponse(
+            '<p class="font-metadata text-xs uppercase text-error font-bold mt-2 neo-fade-in">'
+            'That\'s not quite right. Try again.</p>'
+        )
 
 
 # ─────────────────────────────────────────────
