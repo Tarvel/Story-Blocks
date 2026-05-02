@@ -67,6 +67,12 @@
 
             <div class="border-t-2 border-black mx-4 my-4"></div>
 
+            <!-- Story Settings -->
+            <button id="btn-story-settings"
+                class="w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3">
+                <span class="material-symbols-outlined">settings</span> Story Settings
+            </button>
+
             <!-- Save Story -->
             <a href="{% url 'engine:dashboard' %}"
                 class="block w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3 no-underline">
@@ -74,10 +80,21 @@
             </a>
 
             <!-- Playtest -->
-            <a href="{% url 'engine:play_story' story_id=story.pk %}" target="_blank"
+            <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}" target="_blank"
                 class="block w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3 no-underline">
                 <span class="material-symbols-outlined">play_arrow</span> Playtest
             </a>
+
+            <!-- Publish Status Indicator -->
+            <div class="mx-4 mt-2 flex items-center gap-2">
+                {% if story.is_published %}
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="font-metadata text-[10px] uppercase text-green-600 font-bold">Published</span>
+                {% else %}
+                <div class="w-2 h-2 bg-zinc-400 rounded-full"></div>
+                <span class="font-metadata text-[10px] uppercase text-zinc-400 font-bold">Draft</span>
+                {% endif %}
+            </div>
         </nav>
 
         <!-- Node Count -->
@@ -201,10 +218,62 @@
                         <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Choice Text</label>
                         {{ choice_form.choice_text }}
                     </div>
+                    <!-- Riddle Path (only visible when source is a riddle node) -->
+                    <div id="riddle-path-container" class="hidden">
+                        <label class="font-metadata text-xs uppercase font-bold text-[#7B2D8E] mb-2 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">quiz</span>
+                            Riddle Branch
+                        </label>
+                        {{ choice_form.riddle_path }}
+                        <p class="font-metadata text-[10px] text-[#7B2D8E]/70 mt-1">Set whether this edge is taken on correct or wrong answer.</p>
+                    </div>
                     <button type="submit" class="w-full bg-[#FFEE00] text-black border-4 border-black py-3 font-['Epilogue'] font-[800] uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
                         Create Edge
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Story Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white border-4 border-black neo-shadow-lg p-8 w-full max-w-md neo-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-['Epilogue'] font-[800] text-xl uppercase">Story Settings</h3>
+                <button id="btn-close-settings" class="p-2 border-2 border-black hover:bg-error hover:text-white transition-all">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="settings-form" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Title</label>
+                    <input type="text" name="title" value="{{ story.title }}"
+                        class="w-full bg-white border-4 border-black p-3 font-metadata uppercase focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" />
+                </div>
+                <div>
+                    <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Description</label>
+                    <textarea name="description" rows="3"
+                        class="w-full bg-white border-4 border-black p-3 font-body-md focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">{{ story.description }}</textarea>
+                </div>
+                <div>
+                    <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">lock</span>
+                        Access Password <span class="text-zinc-300">(optional)</span>
+                    </label>
+                    <input type="text" name="access_password" value="{{ story.access_password|default_if_none:'' }}"
+                        class="w-full bg-white border-4 border-black p-3 font-metadata focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        placeholder="Leave blank for public" />
+                    <p class="font-metadata text-[10px] text-zinc-400 mt-1">Players must enter this to play.</p>
+                </div>
+                <div class="flex items-center gap-3 border-4 border-black p-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <input type="checkbox" name="is_published" id="settings-publish" {% if story.is_published %}checked{% endif %}
+                        class="w-5 h-5 border-2 border-black" />
+                    <label for="settings-publish" class="font-metadata uppercase text-sm font-bold cursor-pointer">Publish Story</label>
+                </div>
+                <button type="submit" class="w-full bg-[#FFEE00] text-black border-4 border-black py-3 font-['Epilogue'] font-[800] uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                    Save Settings
+                </button>
             </form>
         </div>
     </div>
@@ -425,10 +494,24 @@
             const dx = Math.abs(tx - sx);
             const cpOffset = Math.max(dx * 0.5, 60);
 
+            // Determine edge color based on riddle path
+            let strokeColor = '#000';
+            let labelPrefix = '';
+            if (edge.is_correct_path === true) {
+                strokeColor = '#16a34a';  // green
+                labelPrefix = '✓ ';
+            } else if (edge.is_correct_path === false) {
+                strokeColor = '#dc2626';  // red
+                labelPrefix = '✗ ';
+            }
+
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('d',
                 `M ${sx} ${sy} C ${sx + cpOffset} ${sy}, ${tx - cpOffset} ${ty}, ${tx} ${ty}`);
             path.setAttribute('class', 'connection-line');
+            if (strokeColor !== '#000') {
+                path.setAttribute('style', `stroke: ${strokeColor}; stroke-width: 3;`);
+            }
             edgeLayer.appendChild(path);
 
             // Edge label at midpoint
@@ -440,8 +523,9 @@
             text.setAttribute('text-anchor', 'middle');
             text.setAttribute('font-size', '11');
             text.setAttribute('font-weight', 'bold');
-            text.setAttribute('fill', '#555');
-            text.textContent = edge.text.length > 24 ? edge.text.substring(0, 22) + '…' : edge.text;
+            text.setAttribute('fill', strokeColor === '#000' ? '#555' : strokeColor);
+            const labelText = labelPrefix + edge.text;
+            text.textContent = labelText.length > 28 ? labelText.substring(0, 26) + '…' : labelText;
             edgeLayer.appendChild(text);
         });
     }
@@ -659,7 +743,33 @@
 
     // ─── CHOICE MODAL ───
     const choiceModal = document.getElementById('choice-modal');
+
+    function refreshChoiceDropdowns() {
+        // Rebuild source/target <select> options from live NODES_DATA
+        const sourceSelect = document.getElementById('id_source_node');
+        const targetSelect = document.getElementById('id_target_node');
+        if (!sourceSelect || !targetSelect) return;
+
+        const buildOptions = (select) => {
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">---------</option>';
+            NODES_DATA.forEach(n => {
+                const opt = document.createElement('option');
+                opt.value = n.id;
+                opt.textContent = `[${n.node_type.toUpperCase()}] ${n.title}`;
+                select.appendChild(opt);
+            });
+            // Restore previous selection if still valid
+            if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+                select.value = currentVal;
+            }
+        };
+        buildOptions(sourceSelect);
+        buildOptions(targetSelect);
+    }
+
     document.getElementById('btn-add-choice').addEventListener('click', () => {
+        refreshChoiceDropdowns();
         choiceModal.classList.remove('hidden');
     });
     document.getElementById('btn-close-choice-modal').addEventListener('click', () => {
@@ -668,6 +778,24 @@
     choiceModal.addEventListener('click', function(e) {
         if (e.target === choiceModal) choiceModal.classList.add('hidden');
     });
+
+    // Toggle riddle path visibility when source node changes
+    const sourceSelect = document.getElementById('id_source_node');
+    const riddlePathContainer = document.getElementById('riddle-path-container');
+    if (sourceSelect && riddlePathContainer) {
+        sourceSelect.addEventListener('change', function() {
+            const nodeId = parseInt(this.value);
+            const nodeData = NODES_DATA.find(n => n.id === nodeId);
+            if (nodeData && nodeData.node_type === 'riddle') {
+                riddlePathContainer.classList.remove('hidden');
+            } else {
+                riddlePathContainer.classList.add('hidden');
+                // Reset the riddle path dropdown
+                const rpSelect = document.getElementById('id_riddle_path');
+                if (rpSelect) rpSelect.value = '';
+            }
+        });
+    }
 
     // Choice form submission
     document.getElementById('choice-form').addEventListener('submit', function(e) {
@@ -685,8 +813,11 @@
                 EDGES_DATA.push(data);
                 renderEdges();
                 choiceModal.classList.add('hidden');
-                log(`EDGE_CREATE :: ${data.source_id} → ${data.target_id}`);
+                const pathLabel = data.is_correct_path === true ? ' ✓' :
+                                  data.is_correct_path === false ? ' ✗' : '';
+                log(`EDGE_CREATE :: ${data.source_id} → ${data.target_id}${pathLabel}`);
                 this.reset();
+                riddlePathContainer.classList.add('hidden');
             }
         });
     });
@@ -734,6 +865,41 @@
     document.addEventListener('mouseup', function() {
         isPanning = false;
         viewport.classList.remove('panning');
+    });
+
+    // ─── STORY SETTINGS MODAL ───
+    const settingsModal = document.getElementById('settings-modal');
+    document.getElementById('btn-story-settings').addEventListener('click', () => {
+        settingsModal.classList.remove('hidden');
+    });
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+    });
+    settingsModal.addEventListener('click', function(e) {
+        if (e.target === settingsModal) settingsModal.classList.add('hidden');
+    });
+
+    document.getElementById('settings-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+
+        fetch(`/story/${STORY_ID}/settings/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: fd,
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                log(`SETTINGS_SAVED :: "${fd.get('title')}"`);
+                showToast('Settings saved');
+                // Reload to reflect new title, publish status etc.
+                setTimeout(() => location.reload(), 800);
+            } else {
+                showToast('Save failed');
+            }
+        })
+        .catch(() => showToast('Settings save failed'));
     });
 
     // ─── INIT ───

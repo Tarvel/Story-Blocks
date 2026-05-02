@@ -4,9 +4,11 @@ engine/models.py
 Core data models for the StoryBoard interactive storytelling platform.
 """
 
+import uuid
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.utils.text import slugify
 
 
 class Story(models.Model):
@@ -22,6 +24,28 @@ class Story(models.Model):
         related_name='stories',
     )
     is_published = models.BooleanField(default=False)
+
+    # Unique identifiers for shareable URLs
+    story_uuid = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        help_text='Unique identifier for shareable play URLs.',
+    )
+    slug = models.SlugField(
+        max_length=280,
+        blank=True,
+        help_text='URL-friendly version of the title (auto-generated).',
+    )
+
+    # Private game access
+    access_password = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        help_text='If set, players must enter this password before playing.',
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,12 +56,47 @@ class Story(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        """Auto-populate slug from title on save."""
+        if not self.slug or self._title_changed():
+            base_slug = slugify(self.title) or 'untitled'
+            slug = base_slug
+            counter = 1
+            # Handle slug collisions
+            while Story.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def _title_changed(self):
+        """Check if title changed since last save."""
+        if not self.pk:
+            return True
+        try:
+            old = Story.objects.get(pk=self.pk)
+            return old.title != self.title
+        except Story.DoesNotExist:
+            return True
+
     def get_absolute_url(self):
         return reverse('engine:story_canvas', kwargs={'story_id': self.pk})
 
+    def get_play_url(self):
+        """Return the shareable play URL using slug + UUID."""
+        return reverse('engine:play_story', kwargs={
+            'slug': self.slug,
+            'story_uuid': self.story_uuid,
+        })
+
     def get_start_node(self):
-        """Return the designated start node for this story."""
-        return self.nodes.filter(node_type='start').first()
+        """Return the designated start node, or fallback to the first node."""
+        start = self.nodes.filter(node_type='start').first()
+        if start:
+            return start
+        # Fallback: use the first node created (e.g. for stories without
+        # an explicit start node set)
+        return self.nodes.order_by('created_at').first()
 
 
 class Node(models.Model):
@@ -95,6 +154,7 @@ class Choice(models.Model):
     """
     Represents an edge/connection between two Nodes.
     This is what the player clicks to navigate the story.
+    For riddle nodes, is_correct_path determines branching on answer validation.
     """
     source_node = models.ForeignKey(
         Node,
@@ -107,6 +167,14 @@ class Choice(models.Model):
         related_name='incoming_choices',
     )
     choice_text = models.CharField(max_length=500, default='Continue...')
+
+    # Riddle branching: True = correct answer path, False = wrong answer path, None = normal choice
+    is_correct_path = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text='For riddle nodes only: True = correct answer, False = wrong answer, None = normal choice.',
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -14,6 +14,7 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('story/create/', views.story_create, name='story_create'),
     path('story/<int:story_id>/delete/', views.story_delete, name='story_delete'),
+    path('story/<int:story_id>/settings/', views.story_settings, name='story_settings'),
 
     # ── Story Canvas ──
     path('story/<int:story_id>/canvas/', views.story_canvas, name='story_canvas'),
@@ -34,7 +35,7 @@ urlpatterns = [
     path('ai/expand/', views.ai_expand, name='ai_expand'),
 
     # ── Player Engine ──
-    path('play/<int:story_id>/', views.play_story, name='play_story'),
+    path('play/<slug:slug>-<uuid:story_uuid>/', views.play_story, name='play_story'),
     path('play/choice/<int:choice_id>/', views.make_choice, name='make_choice'),
     path('play/riddle/<int:node_id>/check/', views.riddle_check, name='riddle_check'),
 

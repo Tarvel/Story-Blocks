@@ -68,7 +68,7 @@
     </section>
     {% elif node.node_type == 'death' or node.node_type == 'ending' %}
     <!-- Restart button for terminal nodes -->
-    <a href="{% url 'engine:play_story' story_id=story.pk %}"
+    <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}"
        class="block w-full bg-[#FFEE00] text-black border-4 border-black p-6 text-center font-['Epilogue'] font-[800] text-xl uppercase shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all no-underline">
         <span class="material-symbols-outlined text-3xl mr-2 align-middle">restart_alt</span>
         Restart Story

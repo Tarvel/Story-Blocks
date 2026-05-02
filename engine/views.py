@@ -14,6 +14,7 @@ Views for the StoryBoard platform:
 import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -92,6 +93,27 @@ def story_delete(request, story_id):
 
 
 @login_required
+@require_POST
+def story_settings(request, story_id):
+    """Update story metadata (title, description, publish, password) from canvas."""
+    story = get_object_or_404(Story, pk=story_id, author=request.user)
+
+    story.title = request.POST.get('title', story.title).strip() or story.title
+    story.description = request.POST.get('description', story.description)
+    story.is_published = request.POST.get('is_published') == 'on'
+    # Handle access_password — empty string means remove password
+    pw = request.POST.get('access_password', '').strip()
+    story.access_password = pw if pw else None
+    story.save()
+
+    return JsonResponse({
+        'status': 'ok',
+        'title': story.title,
+        'is_published': story.is_published,
+    })
+
+
+@login_required
 def story_canvas(request, story_id):
     """
     Story Canvas — the visual node editor.
@@ -119,6 +141,7 @@ def story_canvas(request, story_id):
         'source_id': choice.source_node_id,
         'target_id': choice.target_node_id,
         'text': choice.choice_text,
+        'is_correct_path': choice.is_correct_path,
     } for choice in choices])
 
     choice_form = ChoiceForm(story=story)
@@ -248,6 +271,7 @@ def choice_create(request, story_id):
             'source_id': choice.source_node_id,
             'target_id': choice.target_node_id,
             'text': choice.choice_text,
+            'is_correct_path': choice.is_correct_path,
         })
 
     return JsonResponse({'errors': form.errors}, status=400)
@@ -355,14 +379,33 @@ def ai_expand(request):
 # Phase 5: Player Engine
 # ─────────────────────────────────────────────
 
-def play_story(request, story_id):
+def play_story(request, slug, story_uuid):
     """
     Player view — loads a published story starting from its start node.
-    Handles both initial page load and HTMX node transitions.
+    Uses slug+UUID for shareable URLs with password gate for private stories.
     """
-    story = get_object_or_404(Story, pk=story_id)
+    story = get_object_or_404(Story, story_uuid=story_uuid)
 
-    # Get or determine the current node
+    # ── Password Gate ──
+    if story.access_password:
+        session_key = f'unlocked_{story.story_uuid}'
+        if not request.session.get(session_key):
+            if request.method == 'POST':
+                submitted_password = request.POST.get('password', '')
+                if submitted_password == story.access_password:
+                    request.session[session_key] = True
+                    return redirect('engine:play_story', slug=story.slug, story_uuid=story.story_uuid)
+                else:
+                    return render(request, 'engine/password_gate.html', {
+                        'story': story,
+                        'error': True,
+                    })
+            # GET request — show password gate
+            return render(request, 'engine/password_gate.html', {
+                'story': story,
+            })
+
+    # ── Normal Play Flow ──
     node_id = request.GET.get('node_id')
     if node_id:
         node = get_object_or_404(Node, pk=node_id, story=story)
@@ -427,7 +470,10 @@ def make_choice(request, choice_id):
             'choices': choices,
         })
 
-    return redirect(f'/play/{story.pk}/?node_id={target_node.pk}')
+    play_url = reverse('engine:play_story', kwargs={
+        'slug': story.slug, 'story_uuid': story.story_uuid,
+    })
+    return redirect(f'{play_url}?node_id={target_node.pk}')
 
 
 @require_POST
@@ -435,43 +481,53 @@ def riddle_check(request, node_id):
     """
     Validate a player's answer on a riddle node.
     Case-insensitive match against Node.correct_answer.
-    On success, proceed to the first outgoing choice's target.
+    Routes to correct-path or wrong-path edges based on is_correct_path.
     """
     node = get_object_or_404(Node, pk=node_id, node_type='riddle')
     player_answer = request.POST.get('answer', '').strip()
     story = node.story
+    is_correct = player_answer.lower() == node.correct_answer.lower()
 
-    if player_answer.lower() == node.correct_answer.lower():
-        # Correct — go to the first outgoing choice target
-        first_choice = node.outgoing_choices.first()
-        if first_choice:
-            target_node = first_choice.target_node
-            choices = target_node.get_outgoing_choices()
-
-            # Update game state
-            if request.user.is_authenticated:
-                GameState.objects.filter(
-                    user=request.user, story=story
-                ).update(current_node=target_node)
-
-            if request.headers.get('HX-Request'):
-                return render(request, 'engine/partials/play_content.html', {
-                    'story': story,
-                    'node': target_node,
-                    'choices': choices,
-                })
-            return redirect(f'/play/{story.pk}/?node_id={target_node.pk}')
-        else:
-            # No outgoing choice configured
-            return HttpResponse(
-                '<p class="font-metadata text-xs uppercase text-error font-bold mt-2">'
-                '⚠ Correct! But no next passage is connected.</p>'
-            )
+    # Find the appropriate outgoing edge
+    if is_correct:
+        branch = node.outgoing_choices.filter(is_correct_path=True).first()
     else:
-        # Wrong answer
+        branch = node.outgoing_choices.filter(is_correct_path=False).first()
+
+    # Fallback: if no riddle-specific edges, use first outgoing on correct
+    if not branch and is_correct:
+        branch = node.outgoing_choices.first()
+
+    if branch:
+        target_node = branch.target_node
+        choices = target_node.get_outgoing_choices()
+
+        # Update game state
+        if request.user.is_authenticated:
+            GameState.objects.filter(
+                user=request.user, story=story
+            ).update(current_node=target_node)
+
+        if request.headers.get('HX-Request'):
+            return render(request, 'engine/partials/play_content.html', {
+                'story': story,
+                'node': target_node,
+                'choices': choices,
+            })
+        play_url = reverse('engine:play_story', kwargs={
+            'slug': story.slug, 'story_uuid': story.story_uuid,
+        })
+        return redirect(f'{play_url}?node_id={target_node.pk}')
+    else:
+        # No matching branch edge configured — show inline feedback
+        if is_correct:
+            msg = '✓ Correct! But no next passage is connected.'
+        else:
+            msg = 'That\'s not quite right. Try again.'
+        color = '#16a34a' if is_correct else '#dc2626'
         return HttpResponse(
-            '<p class="font-metadata text-xs uppercase text-error font-bold mt-2 neo-fade-in">'
-            'That\'s not quite right. Try again.</p>'
+            f'<p class="font-metadata text-xs uppercase font-bold mt-2 neo-fade-in" '
+            f'style="color: {color};">{msg}</p>'
         )
 
 

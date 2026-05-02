@@ -147,22 +147,38 @@
 
                 const spinner = document.getElementById('ai-spinner');
                 const buttons = document.getElementById('ai-buttons');
-                const result = document.getElementById('ai-result');
+                const resultEl = document.getElementById('ai-result');
 
                 // Show spinner, disable buttons
                 spinner.classList.remove('hidden');
-                result.innerHTML = '';
+                resultEl.innerHTML = '';
                 buttons.querySelectorAll('.ai-btn').forEach(b => {
                     b.disabled = true;
                     b.classList.add('opacity-40', 'pointer-events-none');
                 });
 
-                htmx.ajax('POST', url, {
-                    target: '#ai-result',
-                    swap: 'innerHTML',
-                    values: { text: ta.value, node_id: '{{ node.pk }}' },
-                }).then(() => {
-                    // Hide spinner, re-enable buttons
+                // Build form data with the CURRENT textarea content
+                const fd = new FormData();
+                fd.append('text', ta.value);
+                fd.append('node_id', '{{ node.pk }}');
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value
+                    || document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: fd,
+                })
+                .then(res => res.text())
+                .then(html => {
+                    resultEl.innerHTML = html;
+                })
+                .catch(err => {
+                    resultEl.innerHTML = '<p class="text-error font-metadata text-xs">⚠ Request failed: ' + err.message + '</p>';
+                })
+                .finally(() => {
                     spinner.classList.add('hidden');
                     buttons.querySelectorAll('.ai-btn').forEach(b => {
                         b.disabled = false;
