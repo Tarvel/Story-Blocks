@@ -1,0 +1,16 @@
+<div class="canvas-node absolute w-52 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] z-10 node-type-{{ node.node_type }}"
+     data-node-id="{{ node.pk }}"
+     style="left: {{ node.x }}px; top: {{ node.y }}px;">
+    <div class="node-header border-b-4 border-black p-2 flex justify-between items-center cursor-pointer"
+         hx-get="{% url 'engine:node_detail' node_id=node.pk %}"
+         hx-target="#node-editor-panel"
+         hx-swap="innerHTML">
+        <span class="font-['Epilogue'] font-[800] text-sm uppercase truncate">{{ node.title }}</span>
+        <span class="material-symbols-outlined text-xs">article</span>
+    </div>
+    <div class="p-3 font-body-md text-xs leading-tight text-zinc-700 line-clamp-3">
+        {{ node.content|truncatechars:80|default:"Empty passage" }}
+    </div>
+    <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-black rounded-full z-20"></div>
+    <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-black rounded-full z-20"></div>
+</div>

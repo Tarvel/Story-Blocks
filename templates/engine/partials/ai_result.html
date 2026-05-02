@@ -1,0 +1,28 @@
+<!-- AI Result Partial -->
+<div class="bg-secondary-container/5 border-2 border-secondary p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] neo-fade-in">
+    <div class="flex justify-between items-start mb-2">
+        <span class="font-metadata text-[10px] uppercase text-secondary font-bold">
+            {% if action == 'enhance' %}Enhanced Version
+            {% elif action == 'choices' %}Suggested Choices
+            {% elif action == 'expand' %}Scene Expansion
+            {% endif %}
+        </span>
+        <button onclick="
+            const ta = document.getElementById('node-content-editor');
+            if (ta) {
+                {% if action == 'expand' %}
+                ta.value += '\n\n' + this.closest('[data-ai-text]').dataset.aiText;
+                {% else %}
+                ta.value = this.closest('[data-ai-text]').dataset.aiText;
+                {% endif %}
+            }
+            this.textContent = '✓ Applied';
+            this.disabled = true;
+        " class="bg-primary-container border-2 border-black px-2 py-1 font-metadata text-[10px] uppercase hover:translate-x-[1px] hover:translate-y-[1px] transition-all">
+            Apply
+        </button>
+    </div>
+    <div data-ai-text="{{ result|escapejs }}">
+        <p class="font-body-md text-on-surface-variant text-sm whitespace-pre-wrap">{{ result }}</p>
+    </div>
+</div>

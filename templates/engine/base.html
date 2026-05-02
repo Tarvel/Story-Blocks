@@ -1,0 +1,178 @@
+{% comment %}
+    engine/base.html
+    Base template with the Neo-brutalist design system, shared header, and HTMX.
+{% endcomment %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>STORY_BLOCKS | {% block title %}Dashboard{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,400;0,700;0,800;0,900;1,900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+    <!-- Tailwind Config (Neo-brutalist Design System) -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#4e4800",
+                        "surface-bright": "#fff9e5",
+                        "on-surface-variant": "#4a4731",
+                        "on-tertiary-fixed": "#002020",
+                        "tertiary": "#006a6a",
+                        "tertiary-fixed": "#6cf7f7",
+                        "surface-container-low": "#f9f4df",
+                        "surface-container-highest": "#e8e3ce",
+                        "on-primary-fixed": "#1f1c00",
+                        "surface": "#fff9e5",
+                        "on-secondary-container": "#d6daff",
+                        "surface-tint": "#676000",
+                        "secondary-container": "#0448ff",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#d8ca00",
+                        "surface-container": "#f3eeda",
+                        "secondary-fixed": "#dde1ff",
+                        "secondary": "#0035c6",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#001257",
+                        "on-background": "#1d1c10",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#0033c0",
+                        "surface-variant": "#e8e3ce",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#b9c3ff",
+                        "on-tertiary-fixed-variant": "#004f50",
+                        "inverse-on-surface": "#f6f1dc",
+                        "primary-fixed": "#f7e600",
+                        "outline": "#7b785f",
+                        "outline-variant": "#ccc7aa",
+                        "surface-container-high": "#ede8d4",
+                        "inverse-surface": "#333123",
+                        "tertiary-fixed-dim": "#49dada",
+                        "primary-fixed-dim": "#d8ca00",
+                        "tertiary-container": "#75ffff",
+                        "on-tertiary-container": "#007676",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#676000",
+                        "on-surface": "#1d1c10",
+                        "surface-dim": "#dfdac6",
+                        "background": "#fff9e5",
+                        "on-primary-container": "#736b00",
+                        "primary-container": "#ffee00"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0",
+                        lg: "0",
+                        xl: "0",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        metadata: ["Space Grotesk"],
+                        "display-xl": ["Epilogue"],
+                        "headline-md": ["Epilogue"],
+                        "headline-lg": ["Epilogue"],
+                        "body-lg": ["Space Grotesk"],
+                        "body-md": ["Space Grotesk"]
+                    },
+                    fontSize: {
+                        metadata: ["14px", { lineHeight: "1.2", fontWeight: "500" }],
+                        "display-xl": ["80px", { lineHeight: "1.0", letterSpacing: "-0.04em", fontWeight: "900" }],
+                        "headline-md": ["32px", { lineHeight: "1.2", fontWeight: "800" }],
+                        "headline-lg": ["48px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "800" }],
+                        "body-lg": ["20px", { lineHeight: "1.5", fontWeight: "400" }],
+                        "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neo-shadow { box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); }
+        .neo-shadow-lg { box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); }
+        .neo-shadow-sm { box-shadow: 2px 2px 0px 0px rgba(0,0,0,1); }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #fff9e5; border-left: 4px solid black; }
+        ::-webkit-scrollbar-thumb { background: #ffee00; border: 4px solid black; }
+
+        /* Dot grid background for canvas */
+        .neo-dot-grid {
+            background-image: radial-gradient(#000 1px, transparent 0);
+            background-size: 24px 24px;
+            background-color: #f3f4f6;
+        }
+
+        /* Neo-brutalist animations */
+        @keyframes neo-slide-in {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes neo-fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .neo-slide-in { animation: neo-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+        .neo-fade-in { animation: neo-fade-in 0.3s ease-out; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen {% block body_class %}{% endblock %}">
+
+    <!-- TopAppBar -->
+    <header class="bg-white border-b-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center w-full px-6 py-3 sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+            <a href="{% url 'engine:dashboard' %}" class="text-2xl font-black italic bg-[#FFEE00] px-2 border-2 border-black font-['Epilogue'] uppercase tracking-tight no-underline text-black hover:scale-105 transition-transform">
+                STORY_BLOCKS
+            </a>
+            <nav class="hidden md:flex gap-4">
+                <a class="text-black font-bold hover:bg-[#FFEE00] px-3 py-1 font-['Epilogue'] uppercase text-sm border-2 border-transparent hover:border-black transition-all" href="{% url 'engine:dashboard' %}">Projects</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'engine:story_create' %}" class="bg-[#FFEE00] text-black border-2 border-black px-4 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none font-['Epilogue'] uppercase text-sm no-underline flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">add_circle</span>
+                Create New
+            </a>
+            {% if user.is_authenticated %}
+            <span class="font-metadata text-xs uppercase bg-white border-2 border-black px-3 py-1">{{ user.username }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="fixed bottom-0 w-full h-16 z-50 flex justify-around items-stretch md:hidden bg-[#FFEE00] border-t-4 border-black">
+        <a class="flex flex-col items-center justify-center text-black/70 flex-1 border-r-2 border-black hover:bg-white/50 transition-transform active:scale-95" href="{% url 'engine:dashboard' %}">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="font-['Epilogue'] font-black text-[10px] uppercase">Projects</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-black/70 flex-1 hover:bg-white/50 transition-transform active:scale-95" href="{% url 'engine:dashboard' %}">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-['Epilogue'] font-black text-[10px] uppercase">Profile</span>
+        </a>
+    </nav>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

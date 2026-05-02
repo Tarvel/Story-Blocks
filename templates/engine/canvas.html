@@ -1,0 +1,632 @@
+{% extends "engine/base.html" %}
+{% block title %}{{ story.title }} — Canvas Editor{% endblock %}
+{% block body_class %}overflow-hidden h-screen flex flex-col{% endblock %}
+
+{% block extra_head %}
+<style>
+    .canvas-node {
+        cursor: grab;
+        user-select: none;
+        transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .canvas-node:active { cursor: grabbing; }
+    .canvas-node.dragging {
+        z-index: 100 !important;
+        box-shadow: 12px 12px 0px 0px rgba(0,0,0,1) !important;
+        transform: scale(1.02);
+    }
+    .canvas-node:hover {
+        box-shadow: 10px 10px 0px 0px rgba(0,0,0,1);
+    }
+    .node-type-start .node-header { background: #FFEE00; color: black; }
+    .node-type-passage .node-header { background: #0035c6; color: white; }
+    .node-type-death .node-header { background: #ba1a1a; color: white; }
+    .node-type-ending .node-header { background: #006a6a; color: white; }
+    .node-type-checkpoint .node-header { background: #333123; color: white; }
+
+    .connection-line {
+        stroke: #000;
+        stroke-width: 3;
+        fill: none;
+        marker-end: url(#arrowhead);
+    }
+
+    /* Canvas panning */
+    #canvas-viewport {
+        cursor: grab;
+    }
+    #canvas-viewport.panning {
+        cursor: grabbing;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-1 overflow-hidden" style="height: calc(100vh - 56px);">
+
+    <!-- Left Sidebar: Tools -->
+    <aside class="w-64 bg-white border-r-4 border-black shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] flex flex-col z-40 hidden lg:flex">
+        <div class="px-6 py-4 border-b-4 border-black">
+            <h2 class="font-['Epilogue'] font-[900] text-lg text-black uppercase leading-none">{{ story.title }}</h2>
+            <p class="font-metadata text-[10px] uppercase text-zinc-500 mt-1">Canvas Editor</p>
+        </div>
+
+        <nav class="flex-1 py-4 space-y-2">
+            <!-- Add Node Button -->
+            <button id="btn-add-node"
+                class="w-[calc(100%-16px)] mx-2 bg-[#FFEE00] text-black border-2 border-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">add_box</span> Add Node
+            </button>
+
+            <!-- Add Choice Button -->
+            <button id="btn-add-choice"
+                class="w-[calc(100%-16px)] mx-2 bg-white text-black border-2 border-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-secondary-fixed transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">linear_scale</span> Add Edge
+            </button>
+
+            <div class="border-t-2 border-black mx-4 my-4"></div>
+
+            <!-- Save Story -->
+            <a href="{% url 'engine:dashboard' %}"
+                class="block w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3 no-underline">
+                <span class="material-symbols-outlined">save</span> Save & Exit
+            </a>
+
+            <!-- Playtest -->
+            <a href="{% url 'engine:play_story' story_id=story.pk %}" target="_blank"
+                class="block w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3 no-underline">
+                <span class="material-symbols-outlined">play_arrow</span> Playtest
+            </a>
+        </nav>
+
+        <!-- Node Count -->
+        <div class="p-4 border-t-2 border-black">
+            <div class="bg-black text-[#FFEE00] p-3 font-mono text-[10px] space-y-1 h-32 overflow-y-auto" id="system-log">
+                <p>> CANVAS_INIT :: Ready</p>
+                <p>> NODES_LOADED :: {{ story.nodes.count }}</p>
+                <p class="animate-pulse">_</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Canvas Area -->
+    <main id="canvas-main" class="flex-1 relative overflow-hidden neo-dot-grid">
+        <!-- Canvas Viewport (pannable + zoomable — contains BOTH nodes and SVG) -->
+        <div id="canvas-viewport" class="absolute inset-0 z-10">
+            <!-- SVG Layer for Edges (INSIDE viewport so it transforms with nodes) -->
+            <svg id="edge-layer" class="absolute inset-0 w-full h-full pointer-events-none" style="overflow:visible;">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+                    </marker>
+                </defs>
+            </svg>
+            <!-- Nodes are rendered here by JS -->
+            <div id="nodes-container"></div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="save-toast" class="fixed top-20 right-8 z-[200] transition-all duration-300 translate-x-[120%] pointer-events-none">
+            <div class="bg-black text-[#FFEE00] border-4 border-[#FFEE00] px-6 py-3 shadow-[4px_4px_0px_0px_rgba(255,238,0,0.4)] flex items-center gap-3">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span id="toast-message" class="font-['Epilogue'] font-[800] text-sm uppercase">Saved</span>
+            </div>
+        </div>
+
+        <!-- Canvas Controls (bottom-left) -->
+        <div class="absolute bottom-8 left-8 flex gap-4 z-30">
+            <div class="bg-white border-4 border-black p-2 flex gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <button id="btn-zoom-in" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+                <button id="btn-zoom-out" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
+                    <span class="material-symbols-outlined">remove</span>
+                </button>
+                <button id="btn-zoom-reset" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
+                    <span class="material-symbols-outlined">center_focus_strong</span>
+                </button>
+            </div>
+            <div class="bg-white border-4 border-black px-4 py-2 font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="font-metadata text-xs uppercase">AUTO-SAVED</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Panel: Node Editor (loaded via HTMX) -->
+    <aside id="node-editor-panel" class="w-0 lg:w-0 bg-white border-l-4 border-black z-40 flex-col overflow-hidden transition-all duration-300 hidden">
+        <!-- Content injected by HTMX -->
+    </aside>
+
+    <!-- Choice Creation Modal -->
+    <div id="choice-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white border-4 border-black neo-shadow-lg p-8 w-full max-w-md neo-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-['Epilogue'] font-[800] text-xl uppercase">Create Edge</h3>
+                <button id="btn-close-choice-modal" class="p-2 border-2 border-black hover:bg-error hover:text-white transition-all">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="choice-form" method="post" action="{% url 'engine:choice_create' story_id=story.pk %}">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Source Node</label>
+                        {{ choice_form.source_node }}
+                    </div>
+                    <div>
+                        <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Target Node</label>
+                        {{ choice_form.target_node }}
+                    </div>
+                    <div>
+                        <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 block">Choice Text</label>
+                        {{ choice_form.choice_text }}
+                    </div>
+                    <button type="submit" class="w-full bg-[#FFEE00] text-black border-4 border-black py-3 font-['Epilogue'] font-[800] uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                        Create Edge
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    // ─── DATA ───
+    const NODES_DATA = {{ nodes_json|safe }};
+    const EDGES_DATA = {{ edges_json|safe }};
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    const STORY_ID = {{ story.pk }};
+
+    // ─── DOM REFS ───
+    const nodesContainer = document.getElementById('nodes-container');
+    const edgeLayer = document.getElementById('edge-layer');
+    const editorPanel = document.getElementById('node-editor-panel');
+    const systemLog = document.getElementById('system-log');
+
+    // ─── CANVAS STATE ───
+    let scale = 1;
+    let panX = 0, panY = 0;
+    let isPanning = false;
+    let panStartX, panStartY;
+
+    // ─── LOGGING ───
+    function log(msg) {
+        const cursor = systemLog.querySelector('.animate-pulse');
+        const p = document.createElement('p');
+        p.textContent = `> ${msg}`;
+        systemLog.insertBefore(p, cursor);
+        systemLog.scrollTop = systemLog.scrollHeight;
+    }
+
+    // ─── RENDER NODES ───
+    function renderNode(data) {
+        const div = document.createElement('div');
+        div.className = `canvas-node absolute w-52 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] z-10 neo-fade-in node-type-${data.node_type}`;
+        div.dataset.nodeId = data.id;
+        div.style.left = `${data.x}px`;
+        div.style.top = `${data.y}px`;
+
+        const typeIcons = {
+            'start': 'play_circle',
+            'passage': 'article',
+            'death': 'skull',
+            'ending': 'flag',
+            'checkpoint': 'bookmark',
+        };
+
+        div.innerHTML = `
+            <div class="node-header border-b-4 border-black p-2 flex justify-between items-center cursor-pointer"
+                 hx-get="/node/${data.id}/detail/"
+                 hx-target="#node-editor-panel"
+                 hx-swap="innerHTML">
+                <span class="font-['Epilogue'] font-[800] text-sm uppercase truncate">${data.title}</span>
+                <span class="material-symbols-outlined text-xs">${typeIcons[data.node_type] || 'article'}</span>
+            </div>
+            <div class="p-3 font-body-md text-xs leading-tight text-zinc-700 line-clamp-3">
+                ${data.content || '<em class="text-zinc-400">Empty passage</em>'}
+            </div>
+            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-black rounded-full z-20 connection-port" data-port="out"></div>
+            <div class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-black rounded-full z-20 connection-port" data-port="in"></div>
+        `;
+
+        nodesContainer.appendChild(div);
+
+        // Process HTMX attributes on the new content
+        htmx.process(div);
+
+        // Add click handler for header (open editor)
+        const header = div.querySelector('.node-header');
+        header.addEventListener('click', function(e) {
+            if (div.classList.contains('dragging')) return;
+            openEditor();
+        });
+
+        // ── DRAG HANDLING ──
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        let nodeStartX, nodeStartY;
+        let hasMoved = false;
+
+        div.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.node-header') && !e.target.closest('.connection-port')) {
+                // Let header clicks through for HTMX
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            hasMoved = false;
+            div.classList.add('dragging');
+
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            nodeStartX = parseFloat(div.style.left);
+            nodeStartY = parseFloat(div.style.top);
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const dx = (e.clientX - dragStartX) / scale;
+            const dy = (e.clientY - dragStartY) / scale;
+
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+
+            const newX = nodeStartX + dx;
+            const newY = nodeStartY + dy;
+
+            div.style.left = `${newX}px`;
+            div.style.top = `${newY}px`;
+
+            // Update data
+            data.x = newX;
+            data.y = newY;
+
+            // Redraw edges
+            renderEdges();
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            div.classList.remove('dragging');
+
+            if (hasMoved) {
+                // Save position to backend
+                fetch(`/node/${data.id}/update/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                    },
+                    body: JSON.stringify({ x: data.x, y: data.y }),
+                }).then(r => {
+                    if (r.ok) log(`POS_SAVE :: Node#${data.id} (${Math.round(data.x)}, ${Math.round(data.y)})`);
+                });
+            }
+        });
+
+        return div;
+    }
+
+    // ─── RENDER EDGES ───
+    // FIX #1: Because the SVG is now INSIDE #canvas-viewport alongside the
+    // nodes, all coordinates are in the same local space. We simply read
+    // each node's CSS left/top + its rendered size — no scale/pan math
+    // needed here because the shared parent transform handles it.
+    function renderEdges() {
+        // Clear existing paths (preserve <defs> with arrowhead marker)
+        const defs = edgeLayer.querySelector('defs');
+        edgeLayer.innerHTML = '';
+        edgeLayer.appendChild(defs);
+
+        EDGES_DATA.forEach(edge => {
+            const sourceEl = nodesContainer.querySelector(`[data-node-id="${edge.source_id}"]`);
+            const targetEl = nodesContainer.querySelector(`[data-node-id="${edge.target_id}"]`);
+            if (!sourceEl || !targetEl) return;
+
+            // Source: right-center port (exit)
+            const sx = parseFloat(sourceEl.style.left) + sourceEl.offsetWidth;
+            const sy = parseFloat(sourceEl.style.top) + sourceEl.offsetHeight / 2;
+            // Target: left-center port (entry)
+            const tx = parseFloat(targetEl.style.left);
+            const ty = parseFloat(targetEl.style.top) + targetEl.offsetHeight / 2;
+
+            // Horizontal distance drives the control-point spread
+            const dx = Math.abs(tx - sx);
+            const cpOffset = Math.max(dx * 0.5, 60);
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d',
+                `M ${sx} ${sy} C ${sx + cpOffset} ${sy}, ${tx - cpOffset} ${ty}, ${tx} ${ty}`);
+            path.setAttribute('class', 'connection-line');
+            edgeLayer.appendChild(path);
+
+            // Edge label at midpoint
+            const labelX = (sx + tx) / 2;
+            const labelY = (sy + ty) / 2 - 10;
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', labelX);
+            text.setAttribute('y', labelY);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '11');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('fill', '#555');
+            text.textContent = edge.text.length > 24 ? edge.text.substring(0, 22) + '…' : edge.text;
+            edgeLayer.appendChild(text);
+        });
+    }
+
+    // ─── OPEN/CLOSE EDITOR ───
+    function openEditor() {
+        editorPanel.classList.remove('hidden', 'w-0', 'lg:w-0');
+        editorPanel.classList.add('flex', 'w-[420px]');
+    }
+
+    function closeEditor() {
+        editorPanel.classList.add('hidden', 'w-0', 'lg:w-0');
+        editorPanel.classList.remove('flex', 'w-[420px]');
+    }
+
+    // Listen for close editor events
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#btn-close-editor')) {
+            closeEditor();
+        }
+    });
+
+    // ─── TOAST HELPER ───
+    function showToast(message) {
+        const toast = document.getElementById('save-toast');
+        const msgEl = document.getElementById('toast-message');
+        msgEl.textContent = message;
+        toast.classList.remove('translate-x-[120%]');
+        toast.classList.add('translate-x-0');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+            toast.classList.remove('translate-x-0');
+            toast.classList.add('translate-x-[120%]');
+        }, 2500);
+    }
+
+    // ─── HTMX EVENT: After node editor loads ───
+    document.addEventListener('htmx:afterSwap', function(e) {
+        if (e.detail.target.id === 'node-editor-panel') {
+            openEditor();
+            htmx.process(editorPanel);
+        }
+    });
+
+    // ─── FIX #2: INTERCEPT NODE EDIT FORM SUBMISSION ───
+    // The HTMX hx-target="#node-{{ node.pk }}" can't find a matching element
+    // because canvas nodes use data-node-id, not an id attribute.
+    // We intercept the submit, use Fetch, update in-memory data, re-render
+    // the node div, and show a toast.
+    document.addEventListener('submit', function(e) {
+        const form = e.target.closest('#node-edit-form');
+        if (!form) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const action = form.getAttribute('hx-post') || form.action;
+        const formData = new FormData(form);
+
+        // Extract the node ID from the URL  (pattern: /node/<id>/update/)
+        const match = action.match(/\/node\/(\d+)\/update\//);
+        if (!match) return;
+        const nodeId = parseInt(match[1]);
+
+        fetch(action, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: formData,
+        })
+        .then(r => {
+            if (!r.ok) throw new Error(`Save failed (${r.status})`);
+            return r.text();
+        })
+        .then(() => {
+            // Sync in-memory data
+            const nodeData = NODES_DATA.find(n => n.id === nodeId);
+            if (nodeData) {
+                nodeData.title = formData.get('title') || nodeData.title;
+                nodeData.content = (formData.get('content') || '').substring(0, 80);
+                nodeData.node_type = formData.get('node_type') || nodeData.node_type;
+            }
+
+            // Re-render the canvas node div
+            const existingEl = nodesContainer.querySelector(`[data-node-id="${nodeId}"]`);
+            if (existingEl && nodeData) {
+                const typeIcons = {
+                    'start': 'play_circle', 'passage': 'article',
+                    'death': 'skull', 'ending': 'flag', 'checkpoint': 'bookmark',
+                };
+                // Update header
+                const header = existingEl.querySelector('.node-header span:first-child');
+                if (header) header.textContent = nodeData.title;
+                const icon = existingEl.querySelector('.node-header span:last-child');
+                if (icon) icon.textContent = typeIcons[nodeData.node_type] || 'article';
+                // Update body preview
+                const body = existingEl.querySelector('.p-3');
+                if (body) body.textContent = nodeData.content || 'Empty passage';
+                // Update type class
+                existingEl.className = existingEl.className.replace(/node-type-\w+/, `node-type-${nodeData.node_type}`);
+            }
+
+            log(`NODE_SAVED :: #${nodeId} "${formData.get('title')}"`);
+            showToast('Node saved successfully');
+        })
+        .catch(err => {
+            log(`ERROR :: ${err.message}`);
+            showToast('Save failed — check console');
+        });
+    });
+
+    // ─── SHARED: CREATE NODE AT POSITION ───
+    function createNodeAt(x, y, autoOpenEditor) {
+        const formData = new FormData();
+        formData.append('title', 'New Node');
+        formData.append('node_type', 'passage');
+        formData.append('x', x);
+        formData.append('y', y);
+
+        return fetch(`/story/${STORY_ID}/node/create/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: formData,
+        })
+        .then(r => r.text())
+        .then(html => {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const nodeEl = temp.firstElementChild;
+            const nodeId = nodeEl.dataset.nodeId;
+
+            const nodeData = {
+                id: parseInt(nodeId),
+                title: 'New Node',
+                content: '',
+                node_type: 'passage',
+                x: x,
+                y: y,
+            };
+            NODES_DATA.push(nodeData);
+            const rendered = renderNode(nodeData);
+            log(`NODE_CREATE :: #${nodeId} at (${Math.round(x)}, ${Math.round(y)})`);
+            showToast('Node created');
+
+            // Auto-open the editor panel so user can start typing
+            if (autoOpenEditor) {
+                htmx.ajax('GET', `/node/${nodeId}/detail/`, {
+                    target: '#node-editor-panel',
+                    swap: 'innerHTML',
+                });
+            }
+
+            return nodeData;
+        });
+    }
+
+    // ─── ADD NODE (sidebar button) ───
+    document.getElementById('btn-add-node').addEventListener('click', function() {
+        const cx = (-panX + window.innerWidth / 2) / scale;
+        const cy = (-panY + window.innerHeight / 2) / scale;
+        createNodeAt(cx, cy, true);
+    });
+
+    // ─── FIX #3: DOUBLE-CLICK TO CREATE NODE ───
+    // Double-click on empty canvas → spawn a passage node at that spot,
+    // auto-open the editor so the user can start typing immediately.
+    const canvasMain = document.getElementById('canvas-main');
+    canvasMain.addEventListener('dblclick', function(e) {
+        // Ignore double-clicks on existing nodes, buttons, or sidebars
+        if (e.target.closest('.canvas-node') ||
+            e.target.closest('button') ||
+            e.target.closest('aside') ||
+            e.target.closest('#choice-modal')) return;
+
+        // Convert screen coordinates → canvas-local coordinates
+        const mainRect = canvasMain.getBoundingClientRect();
+        const clickX = (e.clientX - mainRect.left - panX) / scale;
+        const clickY = (e.clientY - mainRect.top - panY) / scale;
+
+        createNodeAt(clickX, clickY, true);
+    });
+
+    // ─── CHOICE MODAL ───
+    const choiceModal = document.getElementById('choice-modal');
+    document.getElementById('btn-add-choice').addEventListener('click', () => {
+        choiceModal.classList.remove('hidden');
+    });
+    document.getElementById('btn-close-choice-modal').addEventListener('click', () => {
+        choiceModal.classList.add('hidden');
+    });
+    choiceModal.addEventListener('click', function(e) {
+        if (e.target === choiceModal) choiceModal.classList.add('hidden');
+    });
+
+    // Choice form submission
+    document.getElementById('choice-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN },
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                EDGES_DATA.push(data);
+                renderEdges();
+                choiceModal.classList.add('hidden');
+                log(`EDGE_CREATE :: ${data.source_id} → ${data.target_id}`);
+                this.reset();
+            }
+        });
+    });
+
+    // ─── ZOOM CONTROLS ───
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        scale = Math.min(scale + 0.1, 2);
+        applyTransform();
+    });
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        scale = Math.max(scale - 0.1, 0.3);
+        applyTransform();
+    });
+    document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+        scale = 1; panX = 0; panY = 0;
+        applyTransform();
+    });
+
+    // FIX #1 (continued): applyTransform now only transforms the single
+    // viewport div — the SVG edge layer is a child of that div, so both
+    // nodes and arrows receive the same transform automatically.
+    function applyTransform() {
+        const vp = document.getElementById('canvas-viewport');
+        vp.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        vp.style.transformOrigin = '0 0';
+        // Re-render edges so they pick up any newly-visible node dimensions
+        renderEdges();
+    }
+
+    // ─── CANVAS PANNING ───
+    const viewport = document.getElementById('canvas-viewport');
+    viewport.parentElement.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.canvas-node') || e.target.closest('button') || e.target.closest('aside')) return;
+        isPanning = true;
+        panStartX = e.clientX - panX;
+        panStartY = e.clientY - panY;
+        viewport.classList.add('panning');
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!isPanning) return;
+        panX = e.clientX - panStartX;
+        panY = e.clientY - panStartY;
+        applyTransform();
+    });
+    document.addEventListener('mouseup', function() {
+        isPanning = false;
+        viewport.classList.remove('panning');
+    });
+
+    // ─── INIT ───
+    NODES_DATA.forEach(renderNode);
+    // Wait for nodes to render before drawing edges
+    requestAnimationFrame(() => {
+        renderEdges();
+        log('EDGES_DRAWN :: ' + EDGES_DATA.length + ' connections');
+    });
+
+})();
+</script>
+{% endblock %}

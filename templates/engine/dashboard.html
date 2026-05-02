@@ -1,0 +1,82 @@
+{% extends "engine/base.html" %}
+{% block title %}Creator Dashboard{% endblock %}
+
+{% block content %}
+<main class="pt-8 px-6 pb-24 max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <section class="mb-12">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h1 class="font-['Epilogue'] font-[900] text-6xl md:text-8xl text-black uppercase mb-2 tracking-tight leading-none">Projects</h1>
+                <p class="font-body-lg text-on-surface-variant max-w-2xl">Manage your branching narratives from this centralized studio deck.</p>
+            </div>
+            <div class="flex gap-4">
+                <div class="flex flex-col border-2 border-black bg-white p-3 neo-shadow min-w-[120px]">
+                    <span class="font-metadata text-[10px] uppercase text-zinc-500">Active Stories</span>
+                    <span class="font-['Epilogue'] font-[800] text-2xl">{{ stories.count }}</span>
+                </div>
+                <div class="flex flex-col border-2 border-black bg-[#FFEE00] p-3 neo-shadow min-w-[120px]">
+                    <span class="font-metadata text-[10px] uppercase text-black/60">Published</span>
+                    <span class="font-['Epilogue'] font-[800] text-2xl">{{ stories|dictsort:"is_published"|length }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if not stories %}
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center py-24 border-4 border-dashed border-black bg-white">
+        <span class="material-symbols-outlined text-8xl text-zinc-300 mb-6">auto_stories</span>
+        <h2 class="font-['Epilogue'] font-[800] text-3xl uppercase mb-2">No Stories Yet</h2>
+        <p class="font-body-md text-on-surface-variant mb-8">Create your first interactive story to get started.</p>
+        <a href="{% url 'engine:story_create' %}" class="bg-[#FFEE00] text-black border-4 border-black px-8 py-4 font-['Epilogue'] font-[800] text-lg uppercase neo-shadow-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all no-underline flex items-center gap-3">
+            <span class="material-symbols-outlined text-3xl">add_circle</span>
+            Create Your First Story
+        </a>
+    </div>
+    {% else %}
+    <!-- Story Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for story in stories %}
+        <div class="group neo-fade-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="bg-white border-4 border-black neo-shadow-lg p-6 flex flex-col h-full hover:bg-surface-bright transition-all">
+                <!-- Tags -->
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    {% if story.is_published %}
+                    <span class="bg-tertiary text-white px-3 py-1 border-2 border-black text-[10px] font-metadata uppercase">Published</span>
+                    {% else %}
+                    <span class="bg-[#FFEE00] text-black px-3 py-1 border-2 border-black text-[10px] font-metadata uppercase">Draft</span>
+                    {% endif %}
+                    <span class="bg-secondary-container text-white px-3 py-1 border-2 border-black text-[10px] font-metadata uppercase">{{ story.nodes.count }} Nodes</span>
+                </div>
+
+                <!-- Title & Description -->
+                <h3 class="font-['Epilogue'] font-[800] text-2xl mb-2 uppercase group-hover:text-secondary transition-colors leading-tight">{{ story.title }}</h3>
+                <p class="font-body-md text-on-surface-variant line-clamp-2 mb-6 flex-grow">{{ story.description|default:"No description yet." }}</p>
+
+                <!-- Footer -->
+                <div class="mt-auto border-t-4 border-black pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <p class="font-metadata text-[10px] text-zinc-500 uppercase">Last Edited</p>
+                        <p class="font-metadata font-bold text-black uppercase text-xs">{{ story.updated_at|date:"M d, Y • H:i" }}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{% url 'engine:story_canvas' story_id=story.pk %}" class="bg-primary-container text-black border-4 border-black px-4 py-2 font-['Epilogue'] font-[800] text-xs uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all no-underline">
+                            Open Editor
+                        </a>
+                        {% if story.is_published %}
+                        <a href="{% url 'engine:play_story' story_id=story.pk %}" class="bg-secondary text-white border-4 border-black px-4 py-2 font-['Epilogue'] font-[800] text-xs uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all no-underline">
+                            Play
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</main>
+{% endblock %}

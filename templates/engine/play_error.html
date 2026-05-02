@@ -1,0 +1,15 @@
+{% extends "engine/base.html" %}
+{% block title %}Error — {{ story.title }}{% endblock %}
+
+{% block content %}
+<main class="min-h-screen flex items-center justify-center px-6">
+    <div class="max-w-md w-full border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
+        <span class="material-symbols-outlined text-7xl text-error mb-4">error</span>
+        <h1 class="font-['Epilogue'] font-[900] text-3xl uppercase mb-2">Oops</h1>
+        <p class="font-body-md text-on-surface-variant mb-6">{{ error }}</p>
+        <a href="{% url 'engine:dashboard' %}" class="inline-block bg-[#FFEE00] text-black border-4 border-black px-6 py-3 font-['Epilogue'] font-[800] uppercase neo-shadow-lg hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all no-underline">
+            Back to Dashboard
+        </a>
+    </div>
+</main>
+{% endblock %}

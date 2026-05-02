@@ -1,0 +1,21 @@
+{% extends "engine/base.html" %}
+{% block title %}{{ story.title }} — Play{% endblock %}
+
+{% block content %}
+<main class="min-h-screen pb-32">
+    <div class="max-w-3xl mx-auto px-6 py-12 lg:py-24">
+
+        <!-- Story Header -->
+        <div class="mb-12 border-4 border-black bg-primary-container shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
+            <h1 class="font-['Epilogue'] font-[800] text-4xl md:text-5xl text-black uppercase leading-tight">{{ story.title }}</h1>
+            <p class="font-metadata text-xs uppercase text-black/60 mt-2">by {{ story.author.username }}</p>
+        </div>
+
+        <!-- Reading Container (HTMX target) -->
+        <div id="reading-container">
+            {% include "engine/partials/play_content.html" %}
+        </div>
+
+    </div>
+</main>
+{% endblock %}

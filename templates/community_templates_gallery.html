@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#d6daff",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#0033c0",
+                    "tertiary": "#006a6a",
+                    "on-surface": "#1d1c10",
+                    "on-primary-fixed": "#1f1c00",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fff9e5",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#736b00",
+                    "inverse-primary": "#d8ca00",
+                    "on-surface-variant": "#4a4731",
+                    "outline-variant": "#ccc7aa",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#dde1ff",
+                    "surface": "#fff9e5",
+                    "secondary-fixed-dim": "#b9c3ff",
+                    "primary-fixed": "#f7e600",
+                    "on-tertiary-container": "#007676",
+                    "surface-container": "#f3eeda",
+                    "tertiary-container": "#75ffff",
+                    "secondary": "#0035c6",
+                    "surface-container-low": "#f9f4df",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#004f50",
+                    "surface-tint": "#676000",
+                    "on-tertiary-fixed": "#002020",
+                    "surface-variant": "#e8e3ce",
+                    "surface-dim": "#dfdac6",
+                    "surface-container-high": "#ede8d4",
+                    "secondary-container": "#0448ff",
+                    "primary-container": "#ffee00",
+                    "inverse-on-surface": "#f6f1dc",
+                    "tertiary-fixed-dim": "#49dada",
+                    "tertiary-fixed": "#6cf7f7",
+                    "on-secondary-fixed": "#001257",
+                    "on-primary-fixed-variant": "#4e4800",
+                    "primary-fixed-dim": "#d8ca00",
+                    "inverse-surface": "#333123",
+                    "background": "#fff9e5",
+                    "surface-container-highest": "#e8e3ce",
+                    "outline": "#7b785f",
+                    "on-background": "#1d1c10",
+                    "on-primary": "#ffffff",
+                    "primary": "#676000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "unit": "4px",
+                    "lg": "24px",
+                    "gutter": "24px",
+                    "md": "16px",
+                    "margin": "32px",
+                    "sm": "8px",
+                    "xl": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Epilogue"],
+                    "body-md": ["Space Grotesk"],
+                    "body-lg": ["Space Grotesk"],
+                    "headline-md": ["Epilogue"],
+                    "metadata": ["Space Grotesk"],
+                    "display-xl": ["Epilogue"]
+            },
+            "fontSize": {
+                    "headline-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "metadata": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "display-xl": ["80px", {"lineHeight": "1.0", "letterSpacing": "-0.04em", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+        }
+        .neo-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .neo-shadow-sm {
+            box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+        }
+        .active-press:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-zinc-900 border-b-4 border-black dark:border-white sticky top-0 z-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-8">
+<span class="font-['Epilogue'] font-black uppercase tracking-tighter text-3xl text-black dark:text-white italic">STORYBLOCK</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-black dark:text-white font-bold hover:underline font-['Epilogue'] uppercase" href="#">Explore</a>
+<a class="text-black bg-yellow-400 border-2 border-black px-2 font-['Epilogue'] font-bold uppercase" href="#">Templates</a>
+<a class="text-black dark:text-white font-bold hover:underline font-['Epilogue'] uppercase" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-yellow-400 text-black border-2 border-black px-6 py-1 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press hover:bg-blue-500 hover:text-white transition-all">Create</button>
+<div class="w-10 h-10 border-2 border-black bg-zinc-200 overflow-hidden">
+<img alt="Creator Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a trendy creator with a confident expression, set against a vibrant yellow and electric blue graphic background. The lighting is high-contrast and professional, matching a bold neo-brutalist aesthetic. The overall mood is energetic, creative, and highly modern, emphasizing high-fidelity digital photography with sharp textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy6r4aV4twmA5FQxYS8djgCg9UGGkEdEPA6tbHkJD_TpKBTb73W3EzC58beETplemH6qvd3fZ2hz-rPxAIfum7sNBZwv4-o6hL_Pfksi3QWAbbhh60ksgHl3QPnA7IjHtEZ6aH3xUWYVsMCOFnvCPuiAcFi-fxAL3NKBeFklsrpQ1_GGIzidJTD8x69fw3W9CmgDsHFM-NVMGKMHk1VUj7eqnwIBO5a_0_7-vowxB0nOTs1jmcDCrMOyURgHA_JBqXiIt5n_gaN9sC"/>
+</div>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col w-64 p-4 gap-4 bg-zinc-100 dark:bg-zinc-800 border-r-4 border-black dark:border-white h-screen sticky top-[84px] shadow-[4px_0px_0px_0px_rgba(0,0,0,1)]">
+<div class="border-b-2 border-black dark:border-white mb-4 pb-4">
+<h2 class="font-['Epilogue'] font-black uppercase text-xl text-black dark:text-white">Creator Hub</h2>
+<p class="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase">Neo-Brutalist Edition</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 font-['Epilogue'] font-bold uppercase active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span> Feed
+                </a>
+<a class="flex items-center gap-3 p-3 bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-['Epilogue'] font-bold uppercase active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome_motion">auto_awesome_motion</span> Templates
+                </a>
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 font-['Epilogue'] font-bold uppercase active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="book">book</span> Library
+                </a>
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 font-['Epilogue'] font-bold uppercase active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span> Drafts
+                </a>
+</nav>
+<button class="mt-auto bg-blue-600 text-white border-4 border-black p-4 font-['Epilogue'] font-black uppercase neo-shadow active-press">
+                New Story
+            </button>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-margin">
+<div class="max-w-7xl mx-auto">
+<!-- Page Title -->
+<div class="mb-xl">
+<h1 class="font-headline-lg text-headline-lg text-black uppercase mb-sm">COMMUNITY TEMPLATES</h1>
+<div class="h-2 w-32 bg-secondary border-2 border-black"></div>
+</div>
+<!-- Search and Categories -->
+<div class="flex flex-col gap-lg mb-xl">
+<div class="flex flex-col md:flex-row gap-4">
+<div class="flex-1 flex border-4 border-black bg-white neo-shadow overflow-hidden">
+<span class="material-symbols-outlined flex items-center px-4 text-zinc-400" data-icon="search">search</span>
+<input class="w-full py-4 px-2 outline-none font-body-lg text-body-lg placeholder:opacity-50" placeholder="FIND YOUR NEXT ADVENTURE..." type="text"/>
+</div>
+<button class="bg-black text-white px-xl py-4 font-headline-md text-headline-md uppercase neo-shadow active-press">SEARCH</button>
+</div>
+<div class="flex flex-wrap gap-md">
+<button class="bg-yellow-400 text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press">ALL</button>
+<button class="bg-white text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press hover:bg-zinc-100">SCI-FI</button>
+<button class="bg-white text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press hover:bg-zinc-100">FANTASY</button>
+<button class="bg-white text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press hover:bg-zinc-100">MYSTERY</button>
+<button class="bg-white text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press hover:bg-zinc-100">ROMANCE</button>
+<button class="bg-white text-black border-2 border-black px-6 py-2 font-['Epilogue'] font-bold uppercase neo-shadow-sm active-press hover:bg-zinc-100">HORROR</button>
+</div>
+</div>
+<!-- Template Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 1" class="w-full h-full object-cover" data-alt="A gritty cyberpunk city street at night, filled with flickering neon signs in electric blue and bright yellow. The scene is rendered in a high-contrast, graphic illustration style with heavy black linework and bold blocks of color. Rain slicks the pavement, reflecting the chaotic light of a dystopian futuristic landscape. The atmosphere is dense, moody, and technologically aggressive." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeU-vw5RBLV4SzSPodch-d_Mj-pS7q8eS0kEmJ8MMHbgdtH1TV3HSTGXlTWOsc-FworBzwtE5gYrNCtWyGdGy4_PX2slldlpeFuds0BA0Jd6Qn8eciInJOi9IQNELfuQkgUIHRVqIJSZLmK2GoJRDFhoHkwBMQNNmiGdJttppM2fjDKH36zELBlmzqQwiD1vS-Xm0ZsDlPiaOW4qPLWPFKFEHdkDK797MUboHg7YVyPqs1h2NlqALVcEyxYV0W9EBZ-FldrWTxUKi9"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-headline-md text-black leading-none">Cyberpunk Heist</h3>
+<div class="bg-secondary text-white border-2 border-black px-2 py-1 text-xs font-black uppercase">NEW</div>
+</div>
+<p class="font-metadata text-metadata text-zinc-600">by @StoryWizard</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>2.4k</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 2" class="w-full h-full object-cover" data-alt="A dark, imposing Victorian mansion silhouette against a massive, pale full moon. The art style uses a minimalist but heavy neo-brutalist approach with sharp edges and monochromatic shadows. Wisps of fog curl around twisted, leafless trees in the foreground. The lighting is dramatic and eerie, emphasizing a sense of Gothic horror and architectural dread through high-contrast shapes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALRnzSyR7lfqIGmVjaRBCihvDtWz02SuKLKTXIJcK3JrQ_Aei3pg5gE6zRj_FRnqgYku9gv7D7ny9JgUGVhJHA9KVLdi4_ef-OrLr010uWBlW9DzAqfgiduUQAylDC-6LXjok8C-a5knfIgqkqyKg4MPttjxnp2eIgsJnFmLPsHGvav0pAfcqv8TBsqfJPsvqDeO7rSq-YjStaZnDYDDD03mSIbWzRgJp5UhvU-YDT5qaZSrho8W6gnQr6aEjQ17zq5g5ug6_U6Oam"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<h3 class="font-headline-md text-headline-md text-black leading-none">Haunted Victorian Mansion</h3>
+<p class="font-metadata text-metadata text-zinc-600">by @GhostWriter</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>1.8k</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 3" class="w-full h-full object-cover" data-alt="A sprawling space station orbiting a ringed gas giant, depicted in a retro-futuristic pulp sci-fi art style. The composition features vibrant splashes of primary yellow and deep space black, with clean, geometric spacecraft docking in the foreground. The lighting is harsh and direct, simulating the unfiltered glare of a distant star. The mood is epic and adventurous, focusing on vast cosmic scale." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCw8TYST7KB3DjgytW6c6Q8NmUkpu1jYCeIokLo7BcLf0KbC-o2TMM6uhtUvhclPdL9_KiHsl8XaoVJNzhCNBAk6wTpUIRpGxOvQa7qknwxnyM7ApxNPbSt3wGGV14VMOVKW7RAYNxABsapnJNBvOYJUuOPVp4aXqMfHP2M4EId5_PlaITE6ySz6NuPssmT2KsnbJV1sM2gDbWoAjCbVQ-0nUrWxBcvweIiUdv0tg0Sv8ZTMTZ86FK6iSauqTePU4CJTpPU7bnxSnnc"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<h3 class="font-headline-md text-headline-md text-black leading-none">Galactic Core Hub</h3>
+<p class="font-metadata text-metadata text-zinc-600">by @Nebula_9</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>3.1k</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 4" class="w-full h-full object-cover" data-alt="An abstract arrangement of ancient stone monoliths floating in a void of swirling golden mist. The visual style is surrealist neo-brutalist, with heavy textures on the stone surfaces and sharp black shadows defining their jagged edges. The lighting is ethereal yet high-contrast, casting long, dark shadows into the luminous haze. The mood is mysterious and timeless, blending fantasy with brutalist geometry." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPwiQKPc8fRKkqQ0NTboHoCRYHIKA7I4hcEF9DkCAfafWKIlHOVEo74QnOHx4oQkZ8yt1V5IcE8ASC4FMJgZAoP2xAXyS3XxfERjQl_8YEWlqOphJO54xeTYGDGZ_BegMyQkS0nTQ_eUCNGS-J3xoUgTjjsRwEfrAxc_Vzg7rCvKy7tfEkuldkI9o_puSYqZo7NkdM40O1mWOkoUfxkFRnr_r5gUBPlajHTeLIFW-K3b5EULMw7OB9XX7lp3pkL2pTspGP27tDRv5D"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<h3 class="font-headline-md text-headline-md text-black leading-none">The Void Monolith</h3>
+<p class="font-metadata text-metadata text-zinc-600">by @MythosMaker</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>942</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 5" class="w-full h-full object-cover" data-alt="A rain-drenched detective's office seen through a window with venetian blinds, creating striped patterns of light and shadow. The aesthetic is modern film noir, using high-contrast black and white with a single vibrant yellow accent from a desk lamp. The style is graphic and punchy, with thick black outlines and minimal gradients. The atmosphere is tense, sophisticated, and focused on narrative suspense." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQa6_B5gQvYYI95lF7iwTZiU8okcbPQssfO5L5wUryKR7RRexoQ0HvmPc3_f1MmYCef9DVRU3fvCAmeZAnIFkkXhSUWDKcKEvVTAS398nLiYnm2vwU--m-qwX82CbOTqfwC_AitkAwYoJBT_c_NLYidhZWfTewf7V2wBn4O8LboMNuvjpIC3kDICAkJH9yowKRfMvG7DfW1MXLR75NviYO3o-mtDToDcF-nSTi29m_qeSs-uOKsV6EePTY7-cu8Tkt1CiXgRD1S9I0"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<h3 class="font-headline-md text-headline-md text-black leading-none">Noir City Blues</h3>
+<p class="font-metadata text-metadata text-zinc-600">by @DetectiveDore</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>1.2k</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-white border-4 border-black neo-shadow flex flex-col">
+<div class="h-48 border-b-4 border-black relative overflow-hidden">
+<img alt="Preview 6" class="w-full h-full object-cover" data-alt="A lush, enchanted forest floor where oversized glowing mushrooms illuminate a path through gnarled ancient roots. The art style is vibrant and surreal, utilizing an electric blue and neon yellow palette on a dark background. Heavy black shadows give the organic forms a physical, structural presence. The lighting is magical and high-key, creating an atmosphere of wonder and fantasy adventure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOrxEIPXoxcNACYnPfyCAJMgEmUgGa6j50UKn0EZVZji0jiwil4xg-IsQqF3cl-udMqZdt1LxgcG_1oY_bDUEMl80Z6FFizrtrs7lJqjZ13wIvYD4AYWM9BkCt8qsg8OQe8kjgAmyWLSpqbM56kqO63gejcbNJXsLVfj_TLwEcoFJEnR4Y6r2_Xo3KlrARSWfce43uHb7uDpFTaCb5f0o3VnmwiYQp8PTi7gkNRZZt4IFHsf01mwxH8jMbpTNgzYJYmt4gQXOj9SS0"/>
+</div>
+<div class="p-md flex flex-col gap-sm flex-1">
+<h3 class="font-headline-md text-headline-md text-black leading-none">Fae Wilds Crossing</h3>
+<p class="font-metadata text-metadata text-zinc-600">by @ElfLord</p>
+<div class="mt-auto pt-md flex items-center justify-between">
+<div class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>4.5k</span>
+</div>
+<button class="bg-yellow-400 text-black border-2 border-black px-4 py-2 font-['Epilogue'] font-black uppercase neo-shadow-sm active-press">USE TEMPLATE</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-black text-white border-t-4 border-black w-full mt-auto flex flex-col md:flex-row justify-between items-center px-8 py-12">
+<div class="flex flex-col gap-2 mb-8 md:mb-0">
+<span class="text-yellow-400 font-black font-['Epilogue'] text-2xl tracking-tighter italic">STORYBLOCK</span>
+<p class="font-['Epilogue'] font-medium text-sm tracking-widest text-zinc-400 uppercase">© 2024 STORYBLOCK. BUILT FOR CREATORS.</p>
+</div>
+<div class="flex flex-col md:flex-row gap-8 items-center">
+<div class="flex gap-6">
+<a class="text-zinc-400 hover:text-yellow-400 transition-colors font-['Epilogue'] font-medium text-sm tracking-widest uppercase" href="#">Terms of Service</a>
+<a class="text-zinc-400 hover:text-yellow-400 transition-colors font-['Epilogue'] font-medium text-sm tracking-widest uppercase" href="#">Privacy Policy</a>
+<a class="text-zinc-400 hover:text-yellow-400 transition-colors font-['Epilogue'] font-medium text-sm tracking-widest uppercase" href="#">Community Guidelines</a>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 border-2 border-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</div>
+<div class="w-10 h-10 border-2 border-yellow-400 flex items-center justify-center hover:bg-yellow-400 hover:text-black cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

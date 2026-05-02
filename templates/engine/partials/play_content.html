@@ -1,0 +1,54 @@
+<!-- Play Content Partial (swapped via HTMX on choice click) -->
+<div class="neo-fade-in">
+    <!-- Narrative Content -->
+    <article class="space-y-6 mb-12">
+        <p class="font-body-lg text-black leading-relaxed whitespace-pre-wrap">{{ node.content }}</p>
+    </article>
+
+    <!-- Node type indicator -->
+    {% if node.node_type == 'death' %}
+    <div class="bg-error/10 border-4 border-error p-6 shadow-[4px_4px_0px_0px_rgba(186,26,26,1)] mb-8 flex items-center gap-4">
+        <span class="material-symbols-outlined text-error text-4xl">skull</span>
+        <div>
+            <p class="font-['Epilogue'] font-[800] text-xl uppercase text-error">You Have Perished</p>
+            <p class="font-metadata text-xs text-error/70 uppercase">This path leads to ruin.</p>
+        </div>
+    </div>
+    {% elif node.node_type == 'ending' %}
+    <div class="bg-tertiary/10 border-4 border-tertiary p-6 shadow-[4px_4px_0px_0px_rgba(0,106,106,1)] mb-8 flex items-center gap-4">
+        <span class="material-symbols-outlined text-tertiary text-4xl">flag</span>
+        <div>
+            <p class="font-['Epilogue'] font-[800] text-xl uppercase text-tertiary">Story Complete</p>
+            <p class="font-metadata text-xs text-tertiary/70 uppercase">You have reached an ending.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Choice Stack -->
+    {% if choices %}
+    <section class="space-y-4">
+        <p class="font-metadata uppercase font-bold tracking-widest text-zinc-500 mb-4 border-b-2 border-zinc-200 pb-2">Your Decision:</p>
+        {% for choice in choices %}
+        <button class="w-full group relative flex items-center bg-white border-4 border-black p-6 text-left hover:bg-secondary hover:text-white transition-colors shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-2 active:translate-y-2 active:shadow-none"
+                hx-get="{% url 'engine:make_choice' choice_id=choice.pk %}"
+                hx-target="#reading-container"
+                hx-swap="innerHTML"
+                hx-push-url="false">
+            <span class="material-symbols-outlined mr-4 text-3xl group-hover:scale-125 transition-transform">chevron_right</span>
+            <p class="font-['Epilogue'] font-[800] text-lg uppercase leading-tight">{{ choice.choice_text }}</p>
+        </button>
+        {% endfor %}
+    </section>
+    {% elif node.node_type == 'death' or node.node_type == 'ending' %}
+    <!-- Restart button for terminal nodes -->
+    <a href="{% url 'engine:play_story' story_id=story.pk %}"
+       class="block w-full bg-[#FFEE00] text-black border-4 border-black p-6 text-center font-['Epilogue'] font-[800] text-xl uppercase shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all no-underline">
+        <span class="material-symbols-outlined text-3xl mr-2 align-middle">restart_alt</span>
+        Restart Story
+    </a>
+    {% else %}
+    <div class="bg-zinc-100 border-4 border-dashed border-zinc-300 p-6 text-center">
+        <p class="font-metadata uppercase text-zinc-500">No choices available — this passage needs edges.</p>
+    </div>
+    {% endif %}
+</div>
