@@ -83,6 +83,15 @@ def story_create(request):
 
 
 @login_required
+@require_POST
+def story_delete(request, story_id):
+    """Delete a story and all its nodes/choices."""
+    story = get_object_or_404(Story, pk=story_id, author=request.user)
+    story.delete()
+    return redirect('engine:dashboard')
+
+
+@login_required
 def story_canvas(request, story_id):
     """
     Story Canvas — the visual node editor.

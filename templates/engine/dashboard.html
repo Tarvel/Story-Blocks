@@ -61,7 +61,7 @@
                         <p class="font-metadata text-[10px] text-zinc-500 uppercase">Last Edited</p>
                         <p class="font-metadata font-bold text-black uppercase text-xs">{{ story.updated_at|date:"M d, Y • H:i" }}</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
                         <a href="{% url 'engine:story_canvas' story_id=story.pk %}" class="bg-primary-container text-black border-4 border-black px-4 py-2 font-['Epilogue'] font-[800] text-xs uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all no-underline">
                             Open Editor
                         </a>
@@ -70,6 +70,15 @@
                             Play
                         </a>
                         {% endif %}
+                        <form method="post" action="{% url 'engine:story_delete' story_id=story.pk %}"
+                              onsubmit="return confirm('Delete &quot;{{ story.title }}&quot; and all its nodes? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="bg-white text-error border-4 border-black p-2 neo-shadow hover:bg-error hover:text-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                                    title="Delete Story">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ urlpatterns = [
     # ── Dashboard ──
     path('', views.dashboard, name='dashboard'),
     path('story/create/', views.story_create, name='story_create'),
+    path('story/<int:story_id>/delete/', views.story_delete, name='story_delete'),
 
     # ── Story Canvas ──
     path('story/<int:story_id>/canvas/', views.story_canvas, name='story_canvas'),
