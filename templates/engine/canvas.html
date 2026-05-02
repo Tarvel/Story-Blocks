@@ -113,6 +113,44 @@
             </div>
         </div>
 
+        <!-- Floating Help Button (bottom-right) -->
+        <button id="btn-help" class="absolute bottom-8 right-8 z-40 bg-[#FFEE00] text-black border-4 border-black p-4 flex items-center gap-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
+            <span class="material-symbols-outlined text-2xl font-bold">help</span>
+            <span class="font-['Epilogue'] font-[900] uppercase text-lg">Help</span>
+        </button>
+
+        <!-- Help Modal Overlay -->
+        <div id="help-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm transition-all">
+            <div class="bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full relative neo-slide-in">
+                <!-- Close Button -->
+                <button id="btn-close-help" class="absolute -top-4 -right-4 bg-error text-white border-4 border-black w-12 h-12 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
+                    <span class="material-symbols-outlined font-black">close</span>
+                </button>
+                
+                <div class="p-8">
+                    <h2 class="font-['Epilogue'] font-[900] text-3xl uppercase mb-6 border-b-4 border-black pb-4">Editor Guide</h2>
+                    <ul class="space-y-5 font-body-lg">
+                        <li class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">ads_click</span>
+                            <span><strong>Double-click empty canvas</strong> to instantly add a new passage node.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">drag_indicator</span>
+                            <span><strong>Click and drag</strong> a node's header to position it.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">edit_note</span>
+                            <span><strong>Click a node's header</strong> to open the Writer Panel and edit content.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">linear_scale</span>
+                            <span>Click <strong>Add Edge</strong> on the left to connect nodes and build branches.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Canvas Controls (bottom-left) -->
         <div class="absolute bottom-8 left-8 flex gap-4 z-30">
             <div class="bg-white border-4 border-black p-2 flex gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -202,6 +240,49 @@
         systemLog.insertBefore(p, cursor);
         systemLog.scrollTop = systemLog.scrollHeight;
     }
+
+    // ─── HTMX GLOBAL CONFIG ───
+    // Ensure all HTMX requests (like DELETE node/choice) send the CSRF token
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = CSRF_TOKEN;
+    });
+
+    // ─── HTMX EVENT: Node Deleted ───
+    document.body.addEventListener('nodeDeleted', function(e) {
+        const deletedNodeId = e.detail.value;
+        
+        // Remove from DOM
+        const el = nodesContainer.querySelector(`[data-node-id="${deletedNodeId}"]`);
+        if (el) el.remove();
+        
+        // Remove from state
+        const idx = NODES_DATA.findIndex(n => n.id === deletedNodeId);
+        if (idx > -1) NODES_DATA.splice(idx, 1);
+        
+        // Remove attached edges
+        for (let i = EDGES_DATA.length - 1; i >= 0; i--) {
+            if (EDGES_DATA[i].source_id === deletedNodeId || EDGES_DATA[i].target_id === deletedNodeId) {
+                EDGES_DATA.splice(i, 1);
+            }
+        }
+        
+        renderEdges();
+        closeEditor();
+        log(`NODE_DELETED :: #${deletedNodeId}`);
+        showToast('Node deleted');
+    });
+
+    // ─── HTMX EVENT: Edge Deleted ───
+    document.body.addEventListener('edgeDeleted', function(e) {
+        const deletedEdgeId = e.detail.value;
+        const idx = EDGES_DATA.findIndex(edge => edge.id === deletedEdgeId);
+        if (idx > -1) {
+            EDGES_DATA.splice(idx, 1);
+            renderEdges();
+            log(`EDGE_DELETED :: #${deletedEdgeId}`);
+            showToast('Edge deleted');
+        }
+    });
 
     // ─── RENDER NODES ───
     function renderNode(data) {
@@ -374,12 +455,46 @@
         editorPanel.classList.remove('flex', 'w-[420px]');
     }
 
-    // Listen for close editor events
+    // Listen for close editor events (X button)
     document.addEventListener('click', function(e) {
         if (e.target.closest('#btn-close-editor')) {
             closeEditor();
         }
     });
+
+    // ─── CLICK OUTSIDE TO CLOSE EDITOR ───
+    document.addEventListener('mousedown', function(e) {
+        const panel = document.getElementById('node-editor-panel');
+        // Check if panel is visible
+        if (panel && !panel.classList.contains('hidden') && panel.classList.contains('w-[420px]')) {
+            // If the click is outside the panel AND not on a canvas node (to prevent open/close glitch)
+            // AND not on the left tools sidebar
+            if (!panel.contains(e.target) && 
+                !e.target.closest('.canvas-node') && 
+                !e.target.closest('aside.w-64')) {
+                closeEditor();
+            }
+        }
+    });
+
+    // ─── HELP MODAL TOGGLE ───
+    const helpModal = document.getElementById('help-modal');
+    if (document.getElementById('btn-help')) {
+        document.getElementById('btn-help').addEventListener('click', () => {
+            helpModal.classList.remove('hidden');
+        });
+    }
+    if (document.getElementById('btn-close-help')) {
+        document.getElementById('btn-close-help').addEventListener('click', () => {
+            helpModal.classList.add('hidden');
+        });
+    }
+    // Close on overlay click
+    if (helpModal) {
+        helpModal.addEventListener('click', function(e) {
+            if (e.target === helpModal) helpModal.classList.add('hidden');
+        });
+    }
 
     // ─── TOAST HELPER ───
     function showToast(message) {

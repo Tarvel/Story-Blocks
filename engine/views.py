@@ -167,7 +167,10 @@ def node_delete(request, node_id):
     """Delete a node from the canvas."""
     node = get_object_or_404(Node, pk=node_id, story__author=request.user)
     node.delete()
-    return HttpResponse('')
+    import json
+    response = HttpResponse('')
+    response['HX-Trigger'] = json.dumps({'nodeDeleted': node_id})
+    return response
 
 
 # ─────────────────────────────────────────────
@@ -224,7 +227,10 @@ def choice_delete(request, choice_id):
         Choice, pk=choice_id, source_node__story__author=request.user
     )
     choice.delete()
-    return HttpResponse('')
+    import json
+    response = HttpResponse('')
+    response['HX-Trigger'] = json.dumps({'edgeDeleted': choice_id})
+    return response
 
 
 # ─────────────────────────────────────────────
@@ -353,3 +359,17 @@ def make_choice(request, choice_id):
         })
 
     return redirect(f'/play/{story.pk}/?node_id={target_node.pk}')
+
+
+# ─────────────────────────────────────────────
+# Phase 6: Community & Templates
+# ─────────────────────────────────────────────
+
+@login_required
+def community_templates_view(request):
+    """View public templates and stories from the community."""
+    # Fetch published stories (could exclude current user if desired)
+    stories = Story.objects.filter(is_published=True)
+    return render(request, 'engine/community.html', {
+        'stories': stories,
+    })
