@@ -53,11 +53,10 @@ from .services import generate_story_enhancement
 @login_required
 def dashboard(request):
     """Creator Dashboard — lists all of the user's stories."""
-    stories = Story.objects.filter(author=request.user)
+    stories = Story.objects.filter(author=request.user).select_related('author').prefetch_related('nodes')
     return render(request, 'engine/dashboard.html', {
         'stories': stories,
     })
-
 
 @login_required
 def story_create(request):
@@ -82,7 +81,6 @@ def story_create(request):
         form = StoryForm()
     return render(request, 'engine/story_create.html', {'form': form})
 
-
 @login_required
 @require_POST
 def story_delete(request, story_id):
@@ -90,7 +88,6 @@ def story_delete(request, story_id):
     story = get_object_or_404(Story, pk=story_id, author=request.user)
     story.delete()
     return redirect('engine:dashboard')
-
 
 @login_required
 @require_POST
@@ -112,14 +109,16 @@ def story_settings(request, story_id):
         'is_published': story.is_published,
     })
 
-
 @login_required
 def story_canvas(request, story_id):
     """
     Story Canvas — the visual node editor.
     Loads all nodes as JSON for the JS canvas renderer.
     """
-    story = get_object_or_404(Story, pk=story_id, author=request.user)
+    story = get_object_or_404(
+        Story.objects.select_related('author').prefetch_related('nodes'),
+        pk=story_id, author=request.user
+    )
     nodes = story.nodes.all()
     choices = Choice.objects.filter(source_node__story=story).select_related(
         'source_node', 'target_node'
@@ -558,7 +557,7 @@ def riddle_check(request, node_id):
 def community_templates_view(request):
     """View public templates and stories from the community."""
     # Fetch published stories (could exclude current user if desired)
-    stories = Story.objects.filter(is_published=True)
+    stories = Story.objects.filter(is_published=True).select_related('author').prefetch_related('nodes')
     return render(request, 'engine/community.html', {
         'stories': stories,
     })
