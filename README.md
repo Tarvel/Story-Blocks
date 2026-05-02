@@ -17,10 +17,12 @@
 
 | Feature | Description |
 |---|---|
-| **Infinite Canvas Editor** | Drag, pan, and zoom across a dot-grid workspace. Nodes are positioned freely and connected by SVG bezier curves. |
-| **Visual Node System** | Five node types — Start, Passage, Death, Ending, Checkpoint — each color-coded on the canvas. |
+| **Infinite Canvas Editor** | Drag, pan, and zoom across a dot-grid workspace. Nodes are positioned freely and connected by SVG bezier curves. Edges are clickable for easy deletion. |
+| **Visual Node System** | Five node types — Start, Passage, Riddle, Death, Ending, Checkpoint — each color-coded on the canvas. |
+| **Riddle Branching** | Create puzzles where edges dynamically branch based on the player's correct or incorrect answer. |
 | **AI Co-Pilot** | Three AI writing modes: *Enhance Tone*, *Suggest Choices*, and *Expand Scene*, powered by Groq API. |
 | **Live Player Engine** | Play through published stories in a dedicated reader interface with state tracking. |
+| **Password Protection** | Creators can lock their unpublished or private stories behind a custom access password. |
 | **Real-time Sync** | Node edits, deletions, and edge changes update the canvas instantly without page reloads (HTMX + Fetch). |
 | **Community Gallery** | Browse and play published stories from other creators. |
 | **Neo-Brutalist Design** | A bold aesthetic system with thick borders, hard-offset shadows, high-contrast accents, and zero rounded corners. |
@@ -155,9 +157,11 @@ export GROQ_API_KEY='gsk_your_key_here'
 | Create node | Double-click empty canvas **or** sidebar button |
 | Move node | Drag the node body |
 | Edit node | Click the node header |
+| Edit edge | Click the edge line to select, edit, or delete |
 | Pan canvas | Click and drag empty canvas |
 | Zoom | `+` / `−` buttons (bottom-left) |
 | Reset view | Center button (bottom-left) |
+| Story settings | Click **Story Settings** in the sidebar to toggle publish status or set a password |
 | Close editor | Click outside the panel or the `×` button |
 
 ### AI Co-Pilot
@@ -184,9 +188,9 @@ Story ──┬── Node (Start)
 
 | Model | Purpose |
 |---|---|
-| `Story` | Top-level container. Has title, description, author, publish status. |
-| `Node` | A single passage/scene. Stores content, type, and canvas x/y coordinates. |
-| `Choice` | An edge connecting two nodes. Stores the player-facing choice text. |
+| `Story` | Top-level container. Has title, description, author, publish status, slug, UUID, and an optional access password. |
+| `Node` | A single passage/scene. Stores content, type, canvas x/y coordinates, and optional correct answers for riddles. |
+| `Choice` | An edge connecting two nodes. Stores the player-facing choice text. Can be marked as a correct or wrong path for riddle nodes. |
 | `GameState` | Tracks player progress — current node and a JSON field for custom variables (health, inventory, flags). |
 
 ---
@@ -197,6 +201,7 @@ Story ──┬── Node (Start)
 |---|---|---|
 | `GET` | `/` | Creator Dashboard |
 | `GET` | `/story/<id>/canvas/` | Canvas Editor |
+| `POST` | `/story/<id>/settings/` | Update story settings (publish, password) |
 | `POST` | `/story/<id>/node/create/` | Create a node |
 | `POST/PATCH` | `/node/<id>/update/` | Update node content or position |
 | `DELETE` | `/node/<id>/delete/` | Delete a node |
@@ -206,8 +211,9 @@ Story ──┬── Node (Start)
 | `POST` | `/ai/enhance/` | AI: Enhance passage |
 | `POST` | `/ai/choices/` | AI: Suggest choices |
 | `POST` | `/ai/expand/` | AI: Expand scene |
-| `GET` | `/play/<id>/` | Play a story |
+| `GET` | `/play/<slug>-<uuid>/` | Play a story |
 | `GET` | `/play/choice/<id>/` | Make a player choice |
+| `POST` | `/play/riddle/<id>/check/` | Validate a player's riddle answer |
 | `GET` | `/community/` | Community templates gallery |
 
 ---
