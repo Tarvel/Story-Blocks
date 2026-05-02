@@ -98,15 +98,15 @@
             <p class="font-metadata text-[10px] uppercase text-zinc-500 mt-1">Canvas Editor</p>
         </div>
 
-        <nav class="flex-1 py-4 space-y-2">
-            <!-- Add Node Button -->
+        <nav class="flex-1 py-4 flex flex-col gap-2 overflow-y-auto">
+            <!-- Add Passage -->
             <button id="btn-add-node"
-                class="w-[calc(100%-16px)] mx-2 bg-[#FFEE00] text-black border-2 border-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-3">
-                <span class="material-symbols-outlined">add_box</span> Add Node
+                class="w-[calc(100%-16px)] mx-2 bg-white text-black border-2 border-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-secondary-container transition-all flex items-center gap-3">
+                <span class="material-symbols-outlined">add_box</span> Add Passage
             </button>
 
-            <!-- Add Choice Button -->
-            <button id="btn-add-choice"
+            <!-- Add Edge -->
+            <button id="btn-add-edge"
                 class="w-[calc(100%-16px)] mx-2 bg-white text-black border-2 border-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-secondary-fixed transition-all flex items-center gap-3">
                 <span class="material-symbols-outlined">linear_scale</span> Add Edge
             </button>
@@ -154,9 +154,9 @@
     </aside>
 
     <!-- Main Canvas Area -->
-    <main id="canvas-main" class="flex-1 relative overflow-hidden neo-dot-grid">
+    <main id="canvas-main" class="flex-1 relative overflow-hidden neo-dot-grid bg-white">
         <!-- Canvas Viewport (pannable + zoomable — contains BOTH nodes and SVG) -->
-        <div id="canvas-viewport" class="absolute inset-0 z-10">
+        <div id="canvas-viewport" class="absolute inset-0 mt-20 md:mt-0 mb-28 md:mb-0 z-10">
             <!-- SVG Layer for Edges (INSIDE viewport so it transforms with nodes) -->
             <svg id="edge-layer" class="absolute inset-0 w-full h-full" style="overflow:visible; pointer-events: none;">
                 <defs>
@@ -177,61 +177,65 @@
             </div>
         </div>
 
-        <!-- Floating Help Button (bottom-right) -->
-        <button id="btn-help" class="absolute bottom-8 right-8 z-40 bg-[#FFEE00] text-black border-4 border-black p-4 flex items-center gap-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
-            <span class="material-symbols-outlined text-2xl font-bold">help</span>
-            <span class="font-['Epilogue'] font-[900] uppercase text-lg">Help</span>
+        <!-- Autosave Status -->
+        <div class="fixed top-24 left-4 md:absolute md:top-auto md:bottom-8 md:left-56 z-50 bg-white border-4 border-black px-4 py-2 md:py-2 md:h-12 font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse md:border-0 border-2 border-black"></span>
+            <span class="font-metadata text-xs uppercase text-zinc-800">AUTO-SAVED</span>
+        </div>
+
+        <!-- Help Button -->
+        <button id="btn-help" class="fixed top-40 left-4 md:absolute md:top-auto md:bottom-8 md:left-auto md:right-8 z-50 bg-[#FFEE00] text-black border-4 border-black p-3 md:p-4 flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
+            <span class="material-symbols-outlined text-xl md:text-2xl font-bold">help</span>
+            <span class="font-['Epilogue'] font-[900] uppercase text-sm md:text-lg hidden md:block">Help</span>
         </button>
 
         <!-- Help Modal Overlay -->
-        <div id="help-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm transition-all">
+        <div id="help-modal" class="fixed inset-0 bg-black/60 z-[300] hidden flex items-center justify-center p-6 backdrop-blur-sm transition-all">
             <div class="bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] max-w-lg w-full relative neo-slide-in">
                 <!-- Close Button -->
                 <button id="btn-close-help" class="absolute -top-4 -right-4 bg-error text-white border-4 border-black w-12 h-12 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
                     <span class="material-symbols-outlined font-black">close</span>
                 </button>
                 
-                <div class="p-8">
-                    <h2 class="font-['Epilogue'] font-[900] text-3xl uppercase mb-6 border-b-4 border-black pb-4">Editor Guide</h2>
-                    <ul class="space-y-5 font-body-lg">
+                <div class="p-8 max-h-[80vh] overflow-y-auto">
+                    <h2 class="font-['Epilogue'] font-[900] text-2xl md:text-3xl uppercase mb-6 border-b-4 border-black pb-4">Editor Guide</h2>
+                    <ul class="space-y-5 font-body-sm md:font-body-lg">
+                        <li class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">swipe</span>
+                            <span><strong>Navigation:</strong> Click & drag (or swipe with 1 finger) to pan. Scroll wheel (or pinch with 2 fingers) to zoom.</span>
+                        </li>
                         <li class="flex items-start gap-4">
                             <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">ads_click</span>
-                            <span><strong>Double-click empty canvas</strong> to instantly add a new passage node.</span>
+                            <span><strong>Double-click (or double-tap)</strong> the empty canvas to instantly add a new passage node.</span>
                         </li>
                         <li class="flex items-start gap-4">
                             <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">drag_indicator</span>
-                            <span><strong>Click and drag</strong> a node's header to position it.</span>
+                            <span><strong>Drag a node's header</strong> to move it around the canvas.</span>
                         </li>
                         <li class="flex items-start gap-4">
                             <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">edit_note</span>
-                            <span><strong>Click a node's header</strong> to open the Writer Panel and edit content.</span>
+                            <span><strong>Tap/Click a node's header</strong> to open the Writer Panel and edit its content.</span>
                         </li>
                         <li class="flex items-start gap-4">
                             <span class="material-symbols-outlined text-[#FFEE00] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] text-3xl">linear_scale</span>
-                            <span>Click <strong>Add Edge</strong> on the left to connect nodes and build branches.</span>
+                            <span>Use <strong>Add Edge</strong> from the menu to connect nodes together and build branches.</span>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Canvas Controls (bottom-left) -->
-        <div class="absolute bottom-8 left-8 flex gap-4 z-30">
-            <div class="bg-white border-4 border-black p-2 flex gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <button id="btn-zoom-in" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
-                <button id="btn-zoom-out" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
-                    <span class="material-symbols-outlined">remove</span>
-                </button>
-                <button id="btn-zoom-reset" class="p-2 border-2 border-black hover:bg-[#FFEE00] transition-colors">
-                    <span class="material-symbols-outlined">center_focus_strong</span>
-                </button>
-            </div>
-            <div class="bg-white border-4 border-black px-4 py-2 font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
-                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="font-metadata text-xs uppercase">AUTO-SAVED</span>
-            </div>
+        <!-- Canvas Controls (Zoom) -->
+        <div class="fixed bottom-24 left-4 md:absolute md:bottom-8 md:left-8 z-50 flex flex-col md:flex-row md:gap-2 md:p-2 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <button id="btn-zoom-in" class="p-3 md:p-2 border-b-4 md:border-b-0 md:border-2 border-black hover:bg-[#FFEE00] transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined font-black">add</span>
+            </button>
+            <button id="btn-zoom-out" class="p-3 md:p-2 border-b-4 md:border-b-0 md:border-2 border-black hover:bg-[#FFEE00] transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined font-black">remove</span>
+            </button>
+            <button id="btn-zoom-reset" class="p-3 md:p-2 md:border-2 md:border-black hover:bg-[#FFEE00] transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined font-black">center_focus_strong</span>
+            </button>
         </div>
     </main>
 
@@ -323,6 +327,150 @@
             </form>
         </div>
     </div>
+
+    <!-- Mobile Warning Overlay (md:hidden) -->
+    <div id="mobile-warning-overlay" class="fixed inset-0 bg-black/80 z-[300] flex flex-col items-center justify-center p-6 md:hidden backdrop-blur-sm">
+        <div class="bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-sm p-8 text-center relative overflow-hidden neo-slide-in">
+            <!-- Decorative Stripe -->
+            <div class="absolute top-0 left-0 w-full h-4 bg-[#FFEE00] border-b-4 border-black"></div>
+            
+            <span class="material-symbols-outlined text-6xl text-error drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] mt-4 mb-4 block">desktop_windows</span>
+            
+            <h2 class="font-['Epilogue'] font-[900] text-2xl uppercase mb-4 text-black leading-tight">Desktop Recommended</h2>
+            
+            <p class="font-metadata text-sm text-zinc-700 mb-8 leading-relaxed uppercase font-bold">
+                The Story Canvas is a heavy-duty drag-and-drop editor. For the best experience, please switch to a computer.
+            </p>
+            
+            <button id="btn-dismiss-mobile" class="w-full bg-error text-white border-4 border-black py-4 font-['Epilogue'] font-[900] text-sm tracking-widest uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
+                I Understand
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('btn-dismiss-mobile')?.addEventListener('click', function() {
+            document.getElementById('mobile-warning-overlay').classList.add('hidden');
+        });
+    </script>
+
+    <!-- ─── MOBILE COMMAND MENU (md:hidden) ─── -->
+    <!-- Floating Trigger Button -->
+    <button id="btn-mobile-menu" class="fixed bottom-28 right-6 z-[200] w-16 h-16 bg-[#FFEE00] text-black border-4 border-black flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all md:hidden">
+        <span class="material-symbols-outlined text-3xl font-black">menu</span>
+    </button>
+
+    <!-- Bottom Sheet Backdrop -->
+    <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/60 z-[250] hidden transition-opacity md:hidden backdrop-blur-sm"></div>
+
+    <!-- Bottom Sheet -->
+    <div id="mobile-bottom-sheet" class="fixed bottom-0 left-0 w-full bg-white border-t-8 border-black z-[260] transform translate-y-full transition-transform duration-300 md:hidden flex flex-col max-h-[85vh] overflow-y-auto">
+        <div class="p-6 space-y-4">
+            <!-- Close Header -->
+            <div class="flex justify-between items-center mb-4 border-b-4 border-black pb-4">
+                <h3 class="font-['Epilogue'] font-[900] text-2xl uppercase">Commands</h3>
+                <button id="btn-close-mobile-menu" class="bg-error text-white border-4 border-black w-10 h-10 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <span class="material-symbols-outlined font-black">close</span>
+                </button>
+            </div>
+
+            <!-- Actions -->
+            <button id="btn-mobile-add-node" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between">
+                <span>Add Node</span>
+                <span class="material-symbols-outlined">add_box</span>
+            </button>
+
+            <button id="btn-mobile-add-edge" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between">
+                <span>Add Edge</span>
+                <span class="material-symbols-outlined">linear_scale</span>
+            </button>
+
+            <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}" target="_blank" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between no-underline">
+                <span>Playtest</span>
+                <span class="material-symbols-outlined">play_arrow</span>
+            </a>
+
+            <a href="{% url 'engine:dashboard' %}" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between no-underline">
+                <span>Save & Exit</span>
+                <span class="material-symbols-outlined">save</span>
+            </a>
+
+            <!-- Status Indicator -->
+            <div class="w-full border-4 border-black p-4 flex items-center justify-between bg-zinc-100 mt-4">
+                <span class="font-['Epilogue'] font-[900] text-sm uppercase">Status</span>
+                <div class="flex items-center gap-2">
+                    {% if story.is_published %}
+                    <span class="w-3 h-3 bg-green-500 rounded-full border-2 border-black"></span>
+                    <span class="font-['Epilogue'] font-[800] text-sm uppercase text-green-700">Published</span>
+                    {% else %}
+                    <span class="w-3 h-3 bg-zinc-400 rounded-full border-2 border-black"></span>
+                    <span class="font-['Epilogue'] font-[800] text-sm uppercase text-zinc-600">Draft</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Bottom Sheet Logic
+        const btnMobileMenu = document.getElementById('btn-mobile-menu');
+        const btnCloseMobileMenu = document.getElementById('btn-close-mobile-menu');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const mobileBottomSheet = document.getElementById('mobile-bottom-sheet');
+
+        function openMobileMenu() {
+            mobileMenuBackdrop.classList.remove('hidden');
+            setTimeout(() => {
+                mobileBottomSheet.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeMobileMenu() {
+            mobileBottomSheet.classList.add('translate-y-full');
+            setTimeout(() => {
+                mobileMenuBackdrop.classList.add('hidden');
+            }, 300);
+        }
+
+        btnMobileMenu?.addEventListener('click', openMobileMenu);
+        btnCloseMobileMenu?.addEventListener('click', closeMobileMenu);
+        mobileMenuBackdrop?.addEventListener('click', closeMobileMenu);
+
+        // Map mobile buttons to existing functions
+        document.getElementById('btn-mobile-add-node')?.addEventListener('click', () => {
+            closeMobileMenu();
+            // trigger the desktop add node function
+            const vpRect = document.getElementById('canvas-viewport').getBoundingClientRect();
+            // Create at center of viewport
+            const createX = (-panX + (window.innerWidth / 2)) / scale;
+            const createY = (-panY + (window.innerHeight / 2)) / scale;
+            
+            const fd = new FormData();
+            fd.append('title', 'New Passage');
+            fd.append('node_type', 'passage');
+            fd.append('content', 'Write your story here...');
+            fd.append('x', createX);
+            fd.append('y', createY);
+            
+            fetch(`/node/create/{{ story.pk }}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                body: fd
+            }).then(r => r.json()).then(data => {
+                if(data.status === 'ok') {
+                    NODES_DATA.push(data.node);
+                    renderNode(data.node);
+                    showToast('Node Created');
+                }
+            });
+        });
+
+        document.getElementById('btn-mobile-add-edge')?.addEventListener('click', () => {
+            closeMobileMenu();
+            // Trigger desktop add edge button logic
+            document.getElementById('btn-add-edge')?.click();
+        });
+    </script>
 
 </div>
 {% endblock %}
@@ -439,9 +587,16 @@
 
         // Add click handler for header (open editor)
         const header = div.querySelector('.node-header');
+        let lastHeaderTap = 0;
         header.addEventListener('click', function(e) {
-            if (div.classList.contains('dragging')) return;
-            openEditor();
+            const now = Date.now();
+            if (now - lastHeaderTap < 400) { e.preventDefault(); return; }
+            lastHeaderTap = now;
+            if (div.classList.contains('dragging')) {
+                e.preventDefault(); 
+                return;
+            }
+            // Let HTMX handle the request, which will call openEditor() on afterSwap
         });
 
         // ── DRAG HANDLING ──
@@ -467,12 +622,35 @@
             nodeStartY = parseFloat(div.style.top);
         });
 
-        document.addEventListener('mousemove', function(e) {
+        div.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.node-header') && !e.target.closest('.connection-port')) {
+                // Let header touches through for HTMX, but stop propagation so canvas doesn't pan
+                e.stopPropagation();
+                return;
+            }
+            if (e.touches.length !== 1) return;
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            hasMoved = false;
+            div.classList.add('dragging');
+
+            dragStartX = e.touches[0].clientX;
+            dragStartY = e.touches[0].clientY;
+            nodeStartX = parseFloat(div.style.left);
+            nodeStartY = parseFloat(div.style.top);
+        }, { passive: false });
+
+        function handleDragMove(e) {
             if (!isDragging) return;
             e.preventDefault();
+            e.stopPropagation();
 
-            const dx = (e.clientX - dragStartX) / scale;
-            const dy = (e.clientY - dragStartY) / scale;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const dx = (clientX - dragStartX) / scale;
+            const dy = (clientY - dragStartY) / scale;
 
             if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
 
@@ -488,9 +666,12 @@
 
             // Redraw edges
             renderEdges();
-        });
+        }
 
-        document.addEventListener('mouseup', function(e) {
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('touchmove', handleDragMove, { passive: false });
+
+        function handleDragEnd(e) {
             if (!isDragging) return;
             isDragging = false;
             div.classList.remove('dragging');
@@ -508,7 +689,10 @@
                     if (r.ok) log(`POS_SAVE :: Node#${data.id} (${Math.round(data.x)}, ${Math.round(data.y)})`);
                 });
             }
-        });
+        }
+
+        document.addEventListener('mouseup', handleDragEnd);
+        document.addEventListener('touchend', handleDragEnd);
 
         return div;
     }
@@ -655,12 +839,12 @@
     // ─── OPEN/CLOSE EDITOR ───
     function openEditor() {
         editorPanel.classList.remove('hidden', 'w-0', 'lg:w-0');
-        editorPanel.classList.add('flex', 'w-[420px]');
+        editorPanel.classList.add('flex', 'w-full', 'lg:w-[420px]', 'absolute', 'lg:relative', 'inset-0', 'lg:inset-auto', 'z-[300]', 'lg:z-40');
     }
 
     function closeEditor() {
         editorPanel.classList.add('hidden', 'w-0', 'lg:w-0');
-        editorPanel.classList.remove('flex', 'w-[420px]');
+        editorPanel.classList.remove('flex', 'w-full', 'lg:w-[420px]', 'absolute', 'lg:relative', 'inset-0', 'lg:inset-auto', 'z-[300]', 'lg:z-40');
     }
 
     // Listen for close editor events (X button)
@@ -674,7 +858,7 @@
     document.addEventListener('mousedown', function(e) {
         const panel = document.getElementById('node-editor-panel');
         // Check if panel is visible
-        if (panel && !panel.classList.contains('hidden') && panel.classList.contains('w-[420px]')) {
+        if (panel && !panel.classList.contains('hidden') && (panel.classList.contains('w-[420px]') || panel.classList.contains('w-full'))) {
             // If the click is outside the panel AND not on a canvas node (to prevent open/close glitch)
             // AND not on the left tools sidebar
             if (!panel.contains(e.target) && 
@@ -890,11 +1074,11 @@
         buildOptions(targetSelect);
     }
 
-    document.getElementById('btn-add-choice').addEventListener('click', () => {
+    document.getElementById('btn-add-edge')?.addEventListener('click', () => {
         refreshChoiceDropdowns();
         choiceModal.classList.remove('hidden');
     });
-    document.getElementById('btn-close-choice-modal').addEventListener('click', () => {
+    document.getElementById('btn-close-choice-modal')?.addEventListener('click', () => {
         choiceModal.classList.add('hidden');
     });
     choiceModal.addEventListener('click', function(e) {
@@ -991,6 +1175,70 @@
     document.addEventListener('mouseup', function() {
         isPanning = false;
         viewport.classList.remove('panning');
+    });
+
+    // ─── CANVAS TOUCH (PAN & ZOOM) ───
+    let initialPinchDistance = null;
+    let initialScale = 1;
+
+    viewport.parentElement.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.canvas-node') || e.target.closest('button') || e.target.closest('aside') || e.target.closest('.edge-popover')) return;
+        
+        // Clear edge selection when tapping empty canvas
+        if (!e.target.closest('.edge-hitbox')) {
+            clearEdgeSelection();
+        }
+
+        if (e.touches.length === 1) {
+            // Single finger pan
+            isPanning = true;
+            panStartX = e.touches[0].clientX - panX;
+            panStartY = e.touches[0].clientY - panY;
+            viewport.classList.add('panning');
+        } else if (e.touches.length === 2) {
+            // Two fingers pinch
+            e.preventDefault(); // Stop page scroll
+            isPanning = false;
+            initialPinchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialScale = scale;
+        }
+    }, { passive: false });
+
+    viewport.parentElement.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 1 && isPanning) {
+            e.preventDefault(); // Stop page scroll/pull-to-refresh
+            panX = e.touches[0].clientX - panStartX;
+            panY = e.touches[0].clientY - panStartY;
+            applyTransform();
+        } else if (e.touches.length === 2 && initialPinchDistance) {
+            e.preventDefault(); // Stop page scroll
+            const currentDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const pinchRatio = currentDistance / initialPinchDistance;
+            let newScale = initialScale * pinchRatio;
+            
+            // Limit zoom
+            if (newScale > 2) newScale = 2;
+            if (newScale < 0.2) newScale = 0.2;
+            
+            scale = newScale;
+            applyTransform();
+        }
+    }, { passive: false });
+
+    viewport.parentElement.addEventListener('touchend', function(e) {
+        if (e.touches.length < 2) {
+            initialPinchDistance = null;
+        }
+        if (e.touches.length === 0) {
+            isPanning = false;
+            viewport.classList.remove('panning');
+        }
     });
 
     // ─── STORY SETTINGS MODAL ───
