@@ -8,16 +8,40 @@ Views for the StoryBoard platform:
 - Node Editor slide-out panel
 - AI Co-Pilot endpoints
 - Player/Playtest engine
+- User Registration
 """
 
 import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .models import Story, Node, Choice, GameState
 from .forms import StoryForm, NodeForm, ChoiceForm
+
+
+# ─────────────────────────────────────────────
+# Registration
+# ─────────────────────────────────────────────
+
+def register_view(request):
+    """Handle new user registration."""
+    if request.user.is_authenticated:
+        return redirect('engine:dashboard')
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('engine:dashboard')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'registration/register.html', {'form': form})
 from .services import generate_story_enhancement
 
 
