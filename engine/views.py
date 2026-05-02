@@ -378,12 +378,12 @@ def ai_expand(request):
 # Phase 5: Player Engine
 # ─────────────────────────────────────────────
 
-def play_story(request, slug, story_uuid):
+def play_story(request, slug):
     """
     Player view — loads a published story starting from its start node.
-    Uses slug+UUID for shareable URLs with password gate for private stories.
+    Uses slug for shareable URLs with password gate for private stories.
     """
-    story = get_object_or_404(Story, story_uuid=story_uuid)
+    story = get_object_or_404(Story, slug=slug)
 
     # ── Password Gate ──
     if story.access_password:
@@ -393,7 +393,7 @@ def play_story(request, slug, story_uuid):
                 submitted_password = request.POST.get('password', '')
                 if submitted_password == story.access_password:
                     request.session[session_key] = True
-                    return redirect('engine:play_story', slug=story.slug, story_uuid=story.story_uuid)
+                    return redirect('engine:play_story', slug=story.slug)
                 else:
                     return render(request, 'engine/password_gate.html', {
                         'story': story,
@@ -470,7 +470,7 @@ def make_choice(request, choice_id):
         })
 
     play_url = reverse('engine:play_story', kwargs={
-        'slug': story.slug, 'story_uuid': story.story_uuid,
+        'slug': story.slug,
     })
     return redirect(f'{play_url}?node_id={target_node.pk}')
 
@@ -516,7 +516,7 @@ def riddle_check(request, node_id):
             response['HX-Retarget'] = '#reading-container'
             return response
         play_url = reverse('engine:play_story', kwargs={
-            'slug': story.slug, 'story_uuid': story.story_uuid,
+            'slug': story.slug,
         })
         return redirect(f'{play_url}?node_id={target_node.pk}')
     else:
@@ -528,7 +528,7 @@ def riddle_check(request, node_id):
             msg = 'Incorrect. The path is sealed.'
             color = 'text-red-500'
 
-        play_url = reverse('engine:play_story', kwargs={'slug': story.slug, 'story_uuid': story.story_uuid})
+        play_url = reverse('engine:play_story', kwargs={'slug': story.slug})
 
         # Return the feedback message AND an OOB swap to replace the form
         html = f'''

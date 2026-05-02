@@ -35,7 +35,7 @@ urlpatterns = [
     path('ai/expand/', views.ai_expand, name='ai_expand'),
 
     # ── Player Engine ──
-    path('play/<slug:slug>-<uuid:story_uuid>/', views.play_story, name='play_story'),
+    path('play/<slug:slug>/', views.play_story, name='play_story'),
     path('play/choice/<int:choice_id>/', views.make_choice, name='make_choice'),
     path('play/riddle/<int:node_id>/check/', views.riddle_check, name='riddle_check'),
 

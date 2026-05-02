@@ -83,10 +83,9 @@ class Story(models.Model):
         return reverse('engine:story_canvas', kwargs={'story_id': self.pk})
 
     def get_play_url(self):
-        """Return the shareable play URL using slug + UUID."""
+        """Return the shareable play URL using the slug."""
         return reverse('engine:play_story', kwargs={
             'slug': self.slug,
-            'story_uuid': self.story_uuid,
         })
 
     def get_start_node(self):
