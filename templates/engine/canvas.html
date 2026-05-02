@@ -32,6 +32,52 @@
         marker-end: url(#arrowhead);
     }
 
+    /* Invisible wider hitbox for clicking edges */
+    .edge-hitbox {
+        stroke: transparent;
+        stroke-width: 16;
+        fill: none;
+        cursor: pointer;
+        pointer-events: stroke;
+    }
+    .edge-hitbox:hover + .connection-line {
+        stroke-width: 5;
+        filter: drop-shadow(0 0 4px rgba(4, 72, 255, 0.5));
+    }
+
+    .connection-line.edge-selected {
+        stroke: #0448FF !important;
+        stroke-width: 4;
+        filter: drop-shadow(0 0 6px rgba(4, 72, 255, 0.6));
+    }
+
+    /* Edge action popover */
+    .edge-popover {
+        position: absolute;
+        z-index: 100;
+        background: white;
+        border: 3px solid black;
+        box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        padding: 6px;
+        display: flex;
+        gap: 4px;
+        transform: translate(-50%, -100%);
+        margin-top: -12px;
+    }
+    .edge-popover button {
+        border: 2px solid black;
+        padding: 4px 10px;
+        font-family: 'Epilogue', sans-serif;
+        font-weight: 800;
+        font-size: 11px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.1s;
+    }
+    .edge-popover button:hover {
+        transform: translate(1px, 1px);
+    }
+
     /* Canvas panning */
     #canvas-viewport {
         cursor: grab;
@@ -112,7 +158,7 @@
         <!-- Canvas Viewport (pannable + zoomable — contains BOTH nodes and SVG) -->
         <div id="canvas-viewport" class="absolute inset-0 z-10">
             <!-- SVG Layer for Edges (INSIDE viewport so it transforms with nodes) -->
-            <svg id="edge-layer" class="absolute inset-0 w-full h-full pointer-events-none" style="overflow:visible;">
+            <svg id="edge-layer" class="absolute inset-0 w-full h-full" style="overflow:visible; pointer-events: none;">
                 <defs>
                     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
                         <polygon points="0 0, 10 3.5, 0 7" fill="black" />
@@ -472,11 +518,69 @@
     // nodes, all coordinates are in the same local space. We simply read
     // each node's CSS left/top + its rendered size — no scale/pan math
     // needed here because the shared parent transform handles it.
+    let selectedEdgeId = null;
+
+    function clearEdgeSelection() {
+        selectedEdgeId = null;
+        document.querySelectorAll('.edge-selected').forEach(el => el.classList.remove('edge-selected'));
+        const popover = document.getElementById('edge-popover');
+        if (popover) popover.remove();
+    }
+
+    function showEdgePopover(edge, x, y) {
+        clearEdgeSelection();
+        selectedEdgeId = edge.id;
+
+        // Highlight the selected edge
+        const pathEl = edgeLayer.querySelector(`[data-edge-id="${edge.id}"] + .connection-line`);
+        if (pathEl) pathEl.classList.add('edge-selected');
+
+        // Create popover
+        const popover = document.createElement('div');
+        popover.id = 'edge-popover';
+        popover.className = 'edge-popover';
+        popover.style.left = x + 'px';
+        popover.style.top = y + 'px';
+
+        // Riddle path label
+        const pathLabel = edge.is_correct_path === true ? '✓' :
+                          edge.is_correct_path === false ? '✗' : '';
+        const edgeLabel = pathLabel ? `${pathLabel} ${edge.text}` : edge.text;
+
+        popover.innerHTML = `
+            <span style="font-family:'Epilogue';font-weight:900;font-size:10px;text-transform:uppercase;color:#555;padding:4px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${edgeLabel}</span>
+            <button class="bg-red-100 text-red-700 hover:bg-red-600 hover:text-white" data-action="delete">
+                <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">delete</span> Delete
+            </button>
+        `;
+
+        // Delete handler
+        popover.querySelector('[data-action="delete"]').addEventListener('click', () => {
+            fetch(`/choice/${edge.id}/delete/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': CSRF_TOKEN },
+            }).then(r => {
+                if (r.ok) {
+                    EDGES_DATA.splice(EDGES_DATA.findIndex(e => e.id === edge.id), 1);
+                    renderEdges();
+                    log(`EDGE_DELETE :: #${edge.id}`);
+                    showToast('Edge deleted');
+                }
+            });
+        });
+
+        nodesContainer.appendChild(popover);
+    }
+
     function renderEdges() {
         // Clear existing paths (preserve <defs> with arrowhead marker)
         const defs = edgeLayer.querySelector('defs');
         edgeLayer.innerHTML = '';
         edgeLayer.appendChild(defs);
+
+        // Remove any existing popover
+        const oldPopover = document.getElementById('edge-popover');
+        if (oldPopover) oldPopover.remove();
 
         EDGES_DATA.forEach(edge => {
             const sourceEl = nodesContainer.querySelector(`[data-node-id="${edge.source_id}"]`);
@@ -494,6 +598,8 @@
             const dx = Math.abs(tx - sx);
             const cpOffset = Math.max(dx * 0.5, 60);
 
+            const pathD = `M ${sx} ${sy} C ${sx + cpOffset} ${sy}, ${tx - cpOffset} ${ty}, ${tx} ${ty}`;
+
             // Determine edge color based on riddle path
             let strokeColor = '#000';
             let labelPrefix = '';
@@ -505,10 +611,26 @@
                 labelPrefix = '✗ ';
             }
 
+            // Invisible wider hitbox for clicking (rendered FIRST so it sits behind)
+            const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            hitbox.setAttribute('d', pathD);
+            hitbox.setAttribute('class', 'edge-hitbox');
+            hitbox.setAttribute('data-edge-id', edge.id);
+            hitbox.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Convert SVG click to container coords
+                const rect = nodesContainer.getBoundingClientRect();
+                const vpRect = edgeLayer.closest('#canvas-viewport').getBoundingClientRect();
+                const popX = (e.clientX - vpRect.left) / scale;
+                const popY = (e.clientY - vpRect.top) / scale;
+                showEdgePopover(edge, popX, popY);
+            });
+            edgeLayer.appendChild(hitbox);
+
+            // Visible edge line
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d',
-                `M ${sx} ${sy} C ${sx + cpOffset} ${sy}, ${tx - cpOffset} ${ty}, ${tx} ${ty}`);
-            path.setAttribute('class', 'connection-line');
+            path.setAttribute('d', pathD);
+            path.setAttribute('class', 'connection-line' + (selectedEdgeId === edge.id ? ' edge-selected' : ''));
             if (strokeColor !== '#000') {
                 path.setAttribute('style', `stroke: ${strokeColor}; stroke-width: 3;`);
             }
@@ -850,7 +972,11 @@
     // ─── CANVAS PANNING ───
     const viewport = document.getElementById('canvas-viewport');
     viewport.parentElement.addEventListener('mousedown', function(e) {
-        if (e.target.closest('.canvas-node') || e.target.closest('button') || e.target.closest('aside')) return;
+        if (e.target.closest('.canvas-node') || e.target.closest('button') || e.target.closest('aside') || e.target.closest('.edge-popover')) return;
+        // Clear edge selection when clicking empty canvas
+        if (!e.target.closest('.edge-hitbox')) {
+            clearEdgeSelection();
+        }
         isPanning = true;
         panStartX = e.clientX - panX;
         panStartY = e.clientY - panY;
