@@ -126,7 +126,7 @@
             </a>
 
             <!-- Playtest -->
-            <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}" target="_blank"
+            <a href="{% url 'engine:play_story' slug=story.slug %}" target="_blank"
                 class="block w-[calc(100%-16px)] mx-2 text-zinc-600 hover:text-black px-4 py-3 font-['Epilogue'] font-bold text-sm uppercase hover:bg-[#FFEE00] transition-colors flex items-center gap-3 no-underline">
                 <span class="material-symbols-outlined">play_arrow</span> Playtest
             </a>
@@ -385,7 +385,7 @@
                 <span class="material-symbols-outlined">linear_scale</span>
             </button>
 
-            <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}" target="_blank" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between no-underline">
+            <a href="{% url 'engine:play_story' slug=story.slug %}" target="_blank" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between no-underline">
                 <span>Playtest</span>
                 <span class="material-symbols-outlined">play_arrow</span>
             </a>

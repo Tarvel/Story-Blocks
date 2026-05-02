@@ -66,7 +66,7 @@
                             Open Editor
                         </a>
                         {% if story.is_published %}
-                        <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}" class="bg-secondary text-white border-4 border-black px-4 py-2 font-['Epilogue'] font-[800] text-xs uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all no-underline">
+                        <a href="{% url 'engine:play_story' slug=story.slug %}" class="bg-secondary text-white border-4 border-black px-4 py-2 font-['Epilogue'] font-[800] text-xs uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all no-underline">
                             Play
                         </a>
                         {% endif %}

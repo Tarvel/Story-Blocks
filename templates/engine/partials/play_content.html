@@ -65,7 +65,7 @@
     {% elif node.node_type == 'death' or node.node_type == 'ending' %}
     <!-- Restart button for terminal nodes -->
     <div class="flex justify-center mt-20">
-        <a href="{% url 'engine:play_story' slug=story.slug story_uuid=story.story_uuid %}"
+        <a href="{% url 'engine:play_story' slug=story.slug %}"
            class="font-sans text-[10px] tracking-[0.3em] uppercase text-muted px-8 py-4 border border-surface hover:border-muted hover:bg-surface/30 transition-all rounded-sm no-underline flex items-center gap-3 choice-btn">
             <span class="material-symbols-outlined text-lg">restart_alt</span>
             Restart Story
