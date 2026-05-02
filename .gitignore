@@ -30,3 +30,4 @@ ENV/
 ehthumbs.db
 Thumbs.db
 reuse.html
+build.sh
