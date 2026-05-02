@@ -3,7 +3,8 @@
 {% block title %}404 - Lost in the Void{% endblock %}
 
 {% block content %}
-<main class="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-6 text-center">
+<!-- Use an absolute wrapper or flex-grow to guarantee perfect centering regardless of header/footer heights -->
+<main class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-40 bg-background pt-16">
     <!-- Big Glitchy 404 -->
     <h1 class="font-['Epilogue'] font-black text-8xl md:text-[12rem] leading-none mb-4 tracking-tighter mix-blend-difference text-error drop-shadow-[8px_8px_0px_rgba(0,0,0,1)]">
         404

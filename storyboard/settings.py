@@ -18,20 +18,16 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load .env file from project root
-load_dotenv(BASE_DIR / '.env')
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-lho0!zn55zz4wo#_b+56&_gf%)psu6i8xl^8vztk!b7ksqt#fe',
-)
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
