@@ -87,12 +87,21 @@
             </nav>
         </div>
         <div class="flex items-center gap-4">
+            {% if user.is_authenticated %}
             <a href="{% url 'engine:story_create' %}" class="bg-[#FFEE00] text-black border-2 border-black px-4 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none font-['Epilogue'] uppercase text-sm no-underline flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">add_circle</span>
                 Create New
             </a>
-            {% if user.is_authenticated %}
             <span class="font-metadata text-xs uppercase bg-white border-2 border-black px-3 py-1">{{ user.username }}</span>
+            <form action="{% url 'logout' %}" method="post" class="m-0 p-0 flex items-center">
+                {% csrf_token %}
+                <button type="submit" class="text-zinc-600 hover:text-black font-['Epilogue'] font-black uppercase text-xs tracking-tight transition-all duration-75 hover:bg-[#FFEE00] px-3 py-1 border-2 border-transparent hover:border-black cursor-pointer">
+                    LOGOUT
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="text-black font-bold font-['Epilogue'] uppercase tracking-tight px-4 py-2 hover:bg-[#FFEE00] hover:text-black transition-transform duration-75 active:translate-x-1 active:translate-y-1">Login</a>
+            <a href="{% url 'register' %}" class="bg-primary-container text-black font-['Epilogue'] font-black uppercase tracking-tight px-6 py-2 border-2 border-black neo-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">Start Creating</a>
             {% endif %}
         </div>
     </header>

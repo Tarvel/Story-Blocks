@@ -10,8 +10,9 @@ from . import views
 app_name = 'engine'
 
 urlpatterns = [
-    # ── Dashboard ──
-    path('', views.dashboard, name='dashboard'),
+    # ── Landing & Dashboard ──
+    path('', views.landing_page, name='landing_page'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('story/create/', views.story_create, name='story_create'),
     path('story/<int:story_id>/delete/', views.story_delete, name='story_delete'),
     path('story/<int:story_id>/settings/', views.story_settings, name='story_settings'),

@@ -50,6 +50,12 @@ from .services import generate_story_enhancement
 # Phase 2: Dashboard & Canvas Views
 # ─────────────────────────────────────────────
 
+def landing_page(request):
+    """Public landing page with CTA."""
+    if request.user.is_authenticated:
+        return redirect('engine:dashboard')
+    return render(request, 'landing_page.html')
+
 @login_required
 def dashboard(request):
     """Creator Dashboard — lists all of the user's stories."""

@@ -1,0 +1,198 @@
+{% extends "engine/base.html" %}
+
+{% block title %}Build Interactive Stories{% endblock %}
+
+{% block content %}
+<main>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- HERO -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden bg-[#fff9e5]">
+
+        <div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-8 py-16">
+            
+            <!-- Pill badge -->
+            <div class="bg-white border-2 border-black px-4 py-1 font-['Space_Grotesk'] text-xs uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                Interactive Fiction Engine
+            </div>
+
+            <h1 class="font-['Epilogue'] font-black text-5xl md:text-7xl lg:text-8xl leading-[0.95] text-black">
+                YOUR STORY,<br/>
+                <span class="bg-[#FFEE00] px-3 inline-block mt-2 -rotate-1">THEIR CHOICE.</span>
+            </h1>
+
+            <p class="font-['Space_Grotesk'] text-lg md:text-xl text-zinc-600 max-w-xl leading-relaxed">
+                Build branching narratives with a visual canvas editor. 
+                Create choices, riddles, and multiple endings — then share your story with anyone.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                <a href="{% url 'register' %}" class="bg-[#FFEE00] text-black font-['Epilogue'] font-black text-lg uppercase px-10 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all no-underline">
+                    Start Building — Free
+                </a>
+                <a href="{% url 'engine:community' %}" class="bg-white text-black font-['Epilogue'] font-black text-lg uppercase px-10 py-4 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all no-underline">
+                    Browse Stories
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- HOW IT WORKS — 3 steps -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="pt-32 pb-24 px-6 bg-black text-white border-t-4 border-b-4 border-black">
+        <div class="max-w-6xl mx-auto">
+            
+            <h2 class="font-['Epilogue'] font-black text-3xl md:text-5xl uppercase text-center mb-20">
+                HOW IT WORKS
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
+                
+                <!-- Step 1 -->
+                <div class="border-4 border-white p-8 flex flex-col gap-4 md:border-r-0">
+                    <div class="bg-[#FFEE00] text-black w-14 h-14 flex items-center justify-center font-['Epilogue'] font-black text-2xl border-4 border-white">1</div>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase">Write Your Scenes</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-400 leading-relaxed">
+                        Each scene is a node on your canvas. Write the story text, set the mood, add riddles or puzzles — the writer panel has everything you need.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="border-4 border-white p-8 flex flex-col gap-4 md:border-r-0">
+                    <div class="bg-[#FFEE00] text-black w-14 h-14 flex items-center justify-center font-['Epilogue'] font-black text-2xl border-4 border-white">2</div>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase">Connect With Choices</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-400 leading-relaxed">
+                        Link scenes together with choices. "Open the door" goes one way, "run away" goes another. You decide how the story branches.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="border-4 border-white p-8 flex flex-col gap-4">
+                    <div class="bg-[#FFEE00] text-black w-14 h-14 flex items-center justify-center font-['Epilogue'] font-black text-2xl border-4 border-white">3</div>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase">Share & Play</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-400 leading-relaxed">
+                        Hit publish and get a shareable link. Anyone can play your story on any device — no downloads.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- FEATURES BENTO -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="pt-32 pb-24 px-6 bg-[#fff9e5]">
+        <div class="max-w-6xl mx-auto">
+
+            <h2 class="font-['Epilogue'] font-black text-3xl md:text-5xl uppercase mb-20">
+                WHAT YOU GET
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Visual Canvas -->
+                <div class="bg-white border-4 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <span class="material-symbols-outlined text-4xl mb-4 block" style="font-variation-settings: 'FILL' 1;">account_tree</span>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase mb-3">Visual Canvas Editor</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-600 leading-relaxed">
+                        Drag-and-drop nodes on an infinite canvas. See your entire story structure at a glance — every branch, every ending, every connection.
+                    </p>
+                </div>
+
+                <!-- AI Co-Pilot -->
+                <div class="bg-[#FFEE00] border-4 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <span class="material-symbols-outlined text-4xl mb-4 block" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase mb-3">AI Co-Pilot</h3>
+                    <p class="font-['Space_Grotesk'] text-black leading-relaxed">
+                        Stuck on a scene? Let the AI enhance your writing, generate choice options, or expand a storyline. It's your creative sidekick.
+                    </p>
+                </div>
+
+                <!-- Multiple Node Types -->
+                <div class="bg-black text-white border-4 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <span class="material-symbols-outlined text-[#FFEE00] text-4xl mb-4 block" style="font-variation-settings: 'FILL' 1;">category</span>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase mb-3">Riddles, Deaths & Endings</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-300 leading-relaxed">
+                        Not just text. Add riddle nodes that gate progress, death nodes for bad choices, and multiple ending types to reward exploration.
+                    </p>
+                </div>
+
+                <!-- Instant Play -->
+                <div class="bg-white border-4 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <span class="material-symbols-outlined text-4xl mb-4 block" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                    <h3 class="font-['Epilogue'] font-black text-xl uppercase mb-3">Instant Playtest</h3>
+                    <p class="font-['Space_Grotesk'] text-zinc-600 leading-relaxed">
+                        One click to playtest your story in a beautiful reading interface. See exactly what your readers will experience — on desktop or mobile.
+                    </p>
+                </div>
+
+                <!-- Community -->
+                <div class="md:col-span-2 bg-white border-4 border-black p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col md:flex-row gap-8 items-center">
+                    <div class="flex-1">
+                        <span class="material-symbols-outlined text-4xl mb-4 block" style="font-variation-settings: 'FILL' 1;">explore</span>
+                        <h3 class="font-['Epilogue'] font-black text-xl uppercase mb-3">Community Library</h3>
+                        <p class="font-['Space_Grotesk'] text-zinc-600 leading-relaxed">
+                            Browse and play stories built by other creators. Get inspired, learn from their branching structures, or just enjoy a good adventure.
+                        </p>
+                    </div>
+                    <a href="{% url 'engine:community' %}" class="shrink-0 bg-black text-white font-['Epilogue'] font-black uppercase px-8 py-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] hover:bg-zinc-800 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all no-underline">
+                        Explore Stories →
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- FINAL CTA -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="py-24 px-6 bg-black text-white border-t-4 border-black relative overflow-hidden">
+        
+        <!-- Decorative corner -->
+        <div class="absolute top-0 right-0 w-48 h-48 bg-[#FFEE00] -mr-24 -mt-24 rotate-45 border-4 border-black"></div>
+
+        <div class="max-w-3xl mx-auto text-center relative z-10">
+            <h2 class="font-['Epilogue'] font-black text-4xl md:text-6xl uppercase mb-6 leading-[0.95]">
+                EVERY GREAT STORY<br/>
+                <span class="text-[#FFEE00]">STARTS WITH A NODE.</span>
+            </h2>
+            <p class="font-['Space_Grotesk'] text-lg text-zinc-400 mb-10 max-w-lg mx-auto">
+                Free to use. No credit card. Just sign up and start building your first interactive story in minutes.
+            </p>
+            <a href="{% url 'register' %}" class="inline-block bg-[#FFEE00] text-black font-['Epilogue'] font-black text-xl uppercase px-12 py-5 border-4 border-[#FFEE00] shadow-[6px_6px_0px_0px_rgba(255,238,0,0.3)] hover:shadow-[2px_2px_0px_0px_rgba(255,238,0,0.3)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all no-underline">
+                Create Your First Story
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════ -->
+<footer class="w-full px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-6 bg-[#FFEE00] text-black border-t-4 border-black">
+    <div class="flex flex-col gap-1">
+        <div class="text-xl font-black text-black font-['Epilogue'] uppercase italic">STORY_BLOCKS</div>
+        <div class="font-['Space_Grotesk'] text-sm text-zinc-700">© 2026 Story Blocks. Build stories, not walls.</div>
+    </div>
+    <div class="flex flex-wrap justify-center gap-6">
+        <a class="font-['Epilogue'] font-bold uppercase text-sm text-black hover:translate-y-[-2px] transition-transform no-underline" href="{% url 'engine:community' %}">Community</a>
+        <a class="font-['Epilogue'] font-bold uppercase text-sm text-black hover:translate-y-[-2px] transition-transform no-underline" href="{% url 'login' %}">Login</a>
+        <a class="font-['Epilogue'] font-bold uppercase text-sm text-black hover:translate-y-[-2px] transition-transform no-underline" href="{% url 'register' %}">Sign Up</a>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Hide the mobile bottom nav on the landing page */
+    nav.fixed.bottom-0 { display: none !important; }
+</style>
+{% endblock %}
