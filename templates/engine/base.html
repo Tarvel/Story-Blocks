@@ -110,8 +110,12 @@
                 details > summary::-webkit-details-marker { display: none; }
             </style>
             {% else %}
-            <a href="{% url 'login' %}" class="text-black font-bold font-['Epilogue'] uppercase tracking-tight px-4 py-2 hover:bg-[#FFEE00] hover:text-black transition-transform duration-75 active:translate-x-1 active:translate-y-1">Login</a>
-            <a href="{% url 'register' %}" class="bg-primary-container text-black font-['Epilogue'] font-black uppercase tracking-tight px-6 py-2 border-2 border-black neo-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">Start Creating</a>
+            <a href="{% url 'login' %}" class="text-black font-bold font-['Epilogue'] uppercase tracking-tight text-xs sm:text-sm px-3 sm:px-4 py-1 hover:bg-[#FFEE00] hover:text-black transition-all duration-75 active:translate-x-1 active:translate-y-1 border-2 border-transparent hover:border-black">Login</a>
+            <a href="{% url 'register' %}" class="bg-[#FFEE00] text-black font-['Epilogue'] font-black uppercase tracking-tight text-xs sm:text-sm px-3 sm:px-5 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all no-underline flex items-center gap-1 sm:gap-2 h-[28px] sm:h-[32px]">
+                <span class="material-symbols-outlined text-sm sm:text-base">rocket_launch</span>
+                <span class="hidden sm:inline">Start Creating</span>
+                <span class="sm:hidden">Sign Up</span>
+            </a>
             {% endif %}
         </div>
     </header>
