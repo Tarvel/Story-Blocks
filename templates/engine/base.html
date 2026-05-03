@@ -88,17 +88,27 @@
         </div>
         <div class="flex items-center gap-4">
             {% if user.is_authenticated %}
-            <a href="{% url 'engine:story_create' %}" class="bg-[#FFEE00] text-black border-2 border-black px-4 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[4px] active:translate-y-[4px] active:shadow-none font-['Epilogue'] uppercase text-sm no-underline flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">add_circle</span>
-                Create New
+            <a href="{% url 'engine:story_create' %}" class="bg-[#FFEE00] text-black border-2 border-black px-2 sm:px-4 py-1 font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none font-['Epilogue'] uppercase text-xs sm:text-sm no-underline flex items-center gap-1 sm:gap-2 h-[28px] sm:h-[32px]">
+                <span class="material-symbols-outlined text-sm sm:text-base">add_circle</span>
+                <span class="hidden sm:inline">Create New</span>
             </a>
-            <span class="font-metadata text-xs uppercase bg-white border-2 border-black px-3 py-1">{{ user.username }}</span>
-            <form action="{% url 'logout' %}" method="post" class="m-0 p-0 flex items-center">
-                {% csrf_token %}
-                <button type="submit" class="text-zinc-600 hover:text-black font-['Epilogue'] font-black uppercase text-xs tracking-tight transition-all duration-75 hover:bg-[#FFEE00] px-3 py-1 border-2 border-transparent hover:border-black cursor-pointer">
-                    LOGOUT
-                </button>
-            </form>
+            <details class="relative group">
+                <summary class="font-metadata text-xs uppercase bg-white border-2 border-black px-3 py-1 cursor-pointer list-none select-none flex items-center gap-1 hover:bg-[#FFEE00] transition-colors h-[28px] sm:h-[32px]">
+                    {{ user.username }}
+                    <span class="material-symbols-outlined text-[16px] group-open:-scale-y-100 transition-transform">arrow_drop_down</span>
+                </summary>
+                <div class="absolute right-0 top-full mt-2 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col min-w-[140px] z-50">
+                    <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left font-['Epilogue'] font-black uppercase text-xs p-3 hover:bg-[#FFEE00] hover:translate-x-[2px] transition-all cursor-pointer">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </details>
+            <style>
+                details > summary::-webkit-details-marker { display: none; }
+            </style>
             {% else %}
             <a href="{% url 'login' %}" class="text-black font-bold font-['Epilogue'] uppercase tracking-tight px-4 py-2 hover:bg-[#FFEE00] hover:text-black transition-transform duration-75 active:translate-x-1 active:translate-y-1">Login</a>
             <a href="{% url 'register' %}" class="bg-primary-container text-black font-['Epilogue'] font-black uppercase tracking-tight px-6 py-2 border-2 border-black neo-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">Start Creating</a>
