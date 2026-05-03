@@ -559,7 +559,6 @@ def riddle_check(request, node_id):
 # Phase 6: Community & Templates
 # ─────────────────────────────────────────────
 
-@login_required
 def community_templates_view(request):
     """View public templates and stories from the community."""
     # Fetch published stories (could exclude current user if desired)
