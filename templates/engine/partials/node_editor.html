@@ -67,7 +67,7 @@
                 })();
             </script>
 
-            <button type="submit" class="w-full bg-primary-container border-2 border-black py-3 font-['Epilogue'] font-[800] uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            <button type="submit" onclick="closeEditor()" class="w-full bg-primary-container border-2 border-black py-3 font-['Epilogue'] font-[800] uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
                 Commit Changes
             </button>
         </form>
@@ -194,6 +194,7 @@
                     hx-confirm="Delete this node and all its connections?"
                     hx-target="#node-editor-panel"
                     hx-swap="innerHTML"
+                    onclick="closeEditor()"
                     class="w-full bg-white text-error border-2 border-error py-2 font-['Epilogue'] font-[800] uppercase text-xs hover:bg-error hover:text-white transition-all">
                 Delete Node
             </button>

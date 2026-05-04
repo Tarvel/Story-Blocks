@@ -181,6 +181,12 @@
         <div class="fixed top-24 left-4 md:absolute md:top-auto md:bottom-8 md:left-56 z-50 bg-white border-4 border-black px-4 py-2 md:py-2 md:h-12 font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2">
             <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse md:border-0 border-2 border-black"></span>
             <span class="font-metadata text-xs uppercase text-zinc-800">AUTO-SAVED</span>
+            <div id="canvas-loading-spinner" class="htmx-indicator ml-1 md:ml-2">
+                <svg class="animate-spin h-3 w-3 md:h-4 md:w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
         </div>
 
         <!-- Help Button -->
@@ -393,6 +399,11 @@
                 <span class="material-symbols-outlined">linear_scale</span>
             </button>
 
+            <button id="btn-mobile-story-settings" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between">
+                <span>Story Settings</span>
+                <span class="material-symbols-outlined">settings</span>
+            </button>
+
             <a href="{% url 'engine:play_story' slug=story.slug %}" target="_blank" class="w-full bg-white text-black border-4 border-black p-4 font-['Epilogue'] font-[900] text-lg uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FFEE00] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-between no-underline">
                 <span>Playtest</span>
                 <span class="material-symbols-outlined">play_arrow</span>
@@ -477,6 +488,11 @@
             closeMobileMenu();
             // Trigger desktop add edge button logic
             document.getElementById('btn-add-edge')?.click();
+        });
+
+        document.getElementById('btn-mobile-story-settings')?.addEventListener('click', () => {
+            closeMobileMenu();
+            document.getElementById('btn-story-settings')?.click();
         });
     </script>
 
@@ -577,6 +593,7 @@
             <div class="node-header border-b-4 border-black p-2 flex justify-between items-center cursor-pointer"
                  hx-get="/node/${data.id}/detail/"
                  hx-target="#node-editor-panel"
+                 hx-indicator="#canvas-loading-spinner"
                  hx-swap="innerHTML">
                 <span class="font-['Epilogue'] font-[800] text-sm uppercase truncate">${data.title}</span>
                 <span class="material-symbols-outlined text-xs">${typeIcons[data.node_type] || 'article'}</span>
@@ -847,12 +864,15 @@
     // ─── OPEN/CLOSE EDITOR ───
     function openEditor() {
         editorPanel.classList.remove('hidden', 'w-0', 'lg:w-0');
-        editorPanel.classList.add('flex', 'w-full', 'lg:w-[420px]', 'absolute', 'lg:relative', 'inset-0', 'lg:inset-auto', 'z-[300]', 'lg:z-40');
+        // Mobile: 85vw right-aligned so there's a 15vw gap on the left to tap and close
+        editorPanel.classList.add('flex', 'w-[85vw]', 'lg:w-[420px]', 'absolute', 'lg:relative', 'right-0', 'top-0', 'bottom-0', 'shadow-[-10px_0_20px_rgba(0,0,0,0.2)]', 'lg:shadow-none', 'z-[300]', 'lg:z-40');
     }
 
     function closeEditor() {
         editorPanel.classList.add('hidden', 'w-0', 'lg:w-0');
-        editorPanel.classList.remove('flex', 'w-full', 'lg:w-[420px]', 'absolute', 'lg:relative', 'inset-0', 'lg:inset-auto', 'z-[300]', 'lg:z-40');
+        editorPanel.classList.remove('flex', 'w-[85vw]', 'lg:w-[420px]', 'absolute', 'lg:relative', 'right-0', 'top-0', 'bottom-0', 'shadow-[-10px_0_20px_rgba(0,0,0,0.2)]', 'lg:shadow-none', 'z-[300]', 'lg:z-40');
+        // Clear its content to prevent seeing old data if opened again before HTMX replaces it
+        editorPanel.innerHTML = '';
     }
 
     // Listen for close editor events (X button)
@@ -866,12 +886,13 @@
     document.addEventListener('mousedown', function(e) {
         const panel = document.getElementById('node-editor-panel');
         // Check if panel is visible
-        if (panel && !panel.classList.contains('hidden') && (panel.classList.contains('w-[420px]') || panel.classList.contains('w-full'))) {
+        if (panel && !panel.classList.contains('hidden') && (panel.classList.contains('w-[420px]') || panel.classList.contains('w-[85vw]'))) {
             // If the click is outside the panel AND not on a canvas node (to prevent open/close glitch)
             // AND not on the left tools sidebar
             if (!panel.contains(e.target) && 
                 !e.target.closest('.canvas-node') && 
-                !e.target.closest('aside.w-64')) {
+                !e.target.closest('aside.w-64') &&
+                !e.target.closest('.choice-branch-btn')) {
                 closeEditor();
             }
         }
