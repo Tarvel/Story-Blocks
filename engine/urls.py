@@ -42,4 +42,5 @@ urlpatterns = [
 
     # ── Community ──
     path('community/', views.community_templates_view, name='community'),
+    path('community/clone/<int:story_id>/', views.clone_template, name='clone_template'),
 ]

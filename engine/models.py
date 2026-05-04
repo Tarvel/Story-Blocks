@@ -24,6 +24,10 @@ class Story(models.Model):
         related_name='stories',
     )
     is_published = models.BooleanField(default=False)
+    is_template = models.BooleanField(
+        default=False,
+        help_text='If True, other users can clone this story into their own projects.',
+    )
 
     # Unique identifiers for shareable URLs
     story_uuid = models.UUIDField(

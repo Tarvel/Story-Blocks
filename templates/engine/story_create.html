@@ -31,6 +31,14 @@
             <label class="font-metadata uppercase text-sm font-bold cursor-pointer">Publish immediately</label>
         </div>
 
+        <div class="flex items-center gap-3 border-4 border-black p-4 bg-white neo-shadow">
+            {{ form.is_template }}
+            <div>
+                <label class="font-metadata uppercase text-sm font-bold cursor-pointer">Make available as template</label>
+                <p class="font-metadata text-[10px] text-zinc-400 mt-1">Other creators can clone this story and build on it.</p>
+            </div>
+        </div>
+
         <div>
             <label class="font-metadata text-xs uppercase font-bold text-zinc-500 mb-2 flex items-center gap-1">
                 <span class="material-symbols-outlined text-sm">lock</span>

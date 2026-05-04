@@ -12,7 +12,7 @@ class StoryForm(forms.ModelForm):
     """Form for creating and editing stories."""
     class Meta:
         model = Story
-        fields = ['title', 'description', 'is_published', 'access_password']
+        fields = ['title', 'description', 'is_published', 'is_template', 'access_password']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'w-full bg-white border-4 border-black p-4 font-metadata uppercase focus:outline-none focus:bg-primary-container transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]',

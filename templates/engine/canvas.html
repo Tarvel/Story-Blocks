@@ -321,6 +321,14 @@
                         class="w-5 h-5 border-2 border-black" />
                     <label for="settings-publish" class="font-metadata uppercase text-sm font-bold cursor-pointer">Publish Story</label>
                 </div>
+                <div class="flex items-center gap-3 border-4 border-black p-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <input type="checkbox" name="is_template" id="settings-template" {% if story.is_template %}checked{% endif %}
+                        class="w-5 h-5 border-2 border-black" />
+                    <div>
+                        <label for="settings-template" class="font-metadata uppercase text-sm font-bold cursor-pointer">Make Template</label>
+                        <p class="font-metadata text-[10px] text-zinc-400 mt-0.5">Others can clone this story.</p>
+                    </div>
+                </div>
                 <button type="submit" class="w-full bg-[#FFEE00] text-black border-4 border-black py-3 font-['Epilogue'] font-[800] uppercase neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
                     Save Settings
                 </button>

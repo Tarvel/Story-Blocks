@@ -104,6 +104,7 @@ def story_settings(request, story_id):
     story.title = request.POST.get('title', story.title).strip() or story.title
     story.description = request.POST.get('description', story.description)
     story.is_published = request.POST.get('is_published') == 'on'
+    story.is_template = request.POST.get('is_template') == 'on'
     # Handle access_password — empty string means remove password
     pw = request.POST.get('access_password', '').strip()
     story.access_password = pw if pw else None
@@ -560,9 +561,82 @@ def riddle_check(request, node_id):
 # ─────────────────────────────────────────────
 
 def community_templates_view(request):
-    """View public templates and stories from the community."""
-    # Fetch published stories (could exclude current user if desired)
-    stories = Story.objects.filter(is_published=True).select_related('author').prefetch_related('nodes')
-    return render(request, 'engine/community.html', {
-        'stories': stories,
-    })
+    """View public stories and templates from the community with search and pagination."""
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    tab = request.GET.get('tab', 'stories')  # 'stories' or 'templates'
+    query = request.GET.get('q', '').strip()
+
+    if tab == 'templates':
+        qs = Story.objects.filter(is_template=True, is_published=True)
+    else:
+        qs = Story.objects.filter(is_published=True)
+
+    qs = qs.select_related('author').prefetch_related('nodes')
+
+    # Search
+    if query:
+        qs = qs.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(author__username__icontains=query)
+        )
+
+    qs = qs.order_by('-updated_at')
+
+    paginator = Paginator(qs, 9)  # 9 per page (3x3 grid)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'stories': page_obj,
+        'page_obj': page_obj,
+        'current_tab': tab,
+        'search_query': query,
+    }
+
+    # HTMX request → return just the grid partial (no full page reload)
+    if request.headers.get('HX-Request'):
+        return render(request, 'engine/partials/community_grid.html', context)
+
+    return render(request, 'engine/community.html', context)
+
+
+@login_required
+@require_POST
+def clone_template(request, story_id):
+    """Clone a public template story into the current user's project."""
+    original = get_object_or_404(Story, pk=story_id, is_template=True, is_published=True)
+
+    # Create the cloned story
+    new_story = Story.objects.create(
+        title=f"{original.title} (Copy)",
+        description=original.description,
+        author=request.user,
+        is_published=False,
+        is_template=False,
+    )
+
+    # Map old node IDs to new nodes
+    node_map = {}
+    for node in original.nodes.all():
+        old_id = node.pk
+        node.pk = None
+        node.story = new_story
+        node.save()
+        node_map[old_id] = node
+
+    # Re-create all choices with the new node references
+    for choice in Choice.objects.filter(source_node__story=original).select_related('source_node', 'target_node'):
+        new_source = node_map.get(choice.source_node_id)
+        new_target = node_map.get(choice.target_node_id)
+        if new_source and new_target:
+            Choice.objects.create(
+                source_node=new_source,
+                target_node=new_target,
+                choice_text=choice.choice_text,
+                is_correct_path=choice.is_correct_path,
+            )
+
+    return redirect('engine:story_canvas', story_id=new_story.pk)
