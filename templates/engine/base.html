@@ -73,7 +73,12 @@
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-background font-body-md text-on-background min-h-screen {% block body_class %}{% endblock %}">
+<body class="bg-background font-body-md text-on-background min-h-screen pb-20 md:pb-0 {% block body_class %}{% endblock %}">
+
+    <!-- HTMX Loading Indicator -->
+    <div id="htmx-indicator" class="fixed top-0 left-0 w-full h-1 z-[999] pointer-events-none">
+        <div class="htmx-indicator h-full bg-[#FFEE00] animate-pulse"></div>
+    </div>
 
     <!-- TopAppBar -->
     <header class="bg-white border-b-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center w-full px-6 py-3 sticky top-0 z-50">
@@ -122,7 +127,8 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Mobile Bottom Nav -->
+    <!-- Mobile Bottom Nav (auth only) -->
+    {% if user.is_authenticated %}
     <nav class="fixed bottom-0 w-full h-16 z-50 flex justify-around items-stretch md:hidden bg-[#FFEE00] border-t-4 border-black">
         <a class="flex flex-col items-center justify-center text-black/70 flex-1 border-r-2 border-black hover:bg-white/50 transition-transform active:scale-95" href="{% url 'engine:dashboard' %}">
             <span class="material-symbols-outlined">grid_view</span>
@@ -137,6 +143,7 @@
             <span class="font-['Epilogue'] font-black text-[10px] uppercase">Profile</span>
         </a>
     </nav>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -4,6 +4,7 @@
             hx-target="#community-content"
             hx-swap="innerHTML"
             hx-push-url="true"
+            hx-indicator="#search-spinner"
             class="px-6 sm:px-8 py-3 font-['Epilogue'] font-black text-xs sm:text-sm uppercase cursor-pointer border-4 border-black border-r-0 transition-all flex items-center gap-2
             {% if current_tab == 'stories' %}bg-[#FFEE00] text-black{% else %}bg-white text-zinc-400 hover:bg-zinc-50{% endif %}">
         <span class="material-symbols-outlined text-base">play_circle</span>
@@ -14,6 +15,7 @@
             hx-target="#community-content"
             hx-swap="innerHTML"
             hx-push-url="true"
+            hx-indicator="#search-spinner"
             class="px-6 sm:px-8 py-3 font-['Epilogue'] font-black text-xs sm:text-sm uppercase cursor-pointer border-4 border-black transition-all flex items-center gap-2
             {% if current_tab == 'templates' %}bg-[#FFEE00] text-black{% else %}bg-white text-zinc-400 hover:bg-zinc-50{% endif %}">
         <span class="material-symbols-outlined text-base">content_copy</span>
@@ -28,6 +30,7 @@
       hx-swap="innerHTML"
       hx-push-url="true"
       hx-trigger="submit"
+      hx-indicator="#search-spinner"
       class="mb-10">
     <input type="hidden" name="tab" value="{{ current_tab }}" />
     <div class="flex border-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden items-center">
@@ -37,6 +40,13 @@
         <input name="q" value="{{ search_query }}"
                class="w-full py-3 px-2 outline-none font-['Space_Grotesk'] placeholder:opacity-50 text-black text-sm sm:text-base border-none"
                placeholder="Search by title, description, or author..." type="text"/>
+        <!-- Spinner -->
+        <div id="search-spinner" class="htmx-indicator flex-shrink-0 px-3">
+            <svg class="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
     </div>
 </form>
 
